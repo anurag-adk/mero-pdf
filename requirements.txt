@@ -1,2 +1,13 @@
+#langchain modules
 langchain-community
-pypdf
+langchain-unstructured 
+unstructured-client 
+unstructured 
+unstructured[pdf]
+python-magic
+langchain-groq
+langchain-huggingface
+
+# tools
+sentence-transformers
+faiss-cpu
