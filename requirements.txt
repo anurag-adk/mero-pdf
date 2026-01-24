@@ -10,4 +10,4 @@ langchain-huggingface
 
 # tools
 sentence-transformers
-faiss-cpu
+qdrant-client
