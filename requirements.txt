@@ -10,4 +10,4 @@ langchain-huggingface
 
 # tools
 sentence-transformers
-qdrant-client
+qdrant-client == 1.7.3
