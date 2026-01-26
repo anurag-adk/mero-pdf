@@ -1,16 +1,11 @@
 import os
-import sys
-
-# Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 import pickle
 from langchain_unstructured import UnstructuredLoader
 from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
 
-from backend.scripts.config import (
+from backend.app.core.config import (
     UNSTRUCTURED_API_KEY,
     DOCS_CACHE_PATH,
     RAW_DATA_DIR,
@@ -22,17 +17,22 @@ from backend.scripts.config import (
     CHUNK_OVERLAP
 )
 
-def load_documents(file_name="finetunexlmr.pdf", force_reload=False):
+def load_documents(file_path=None, force_reload=False):
     """
     Load documents from cache or via Unstructured API.
+    Args:
+        file_path: Path to the PDF file (can be string or Path object)
+        force_reload: Force reload from API even if cached
     """
-    if not force_reload and DOCS_CACHE_PATH.exists():
-        with open(DOCS_CACHE_PATH, 'rb') as f:
-            docs = pickle.load(f)
-        print("Loaded from cache")
-        return docs
+    # If no file_path provided, use default
+    if file_path is None:
+        file_path = RAW_DATA_DIR / "finetunexlmr.pdf"
+    else:
+        # Convert string to Path if needed
+        from pathlib import Path
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
     
-    file_path = RAW_DATA_DIR / file_name
     if not file_path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
 
@@ -50,11 +50,7 @@ def load_documents(file_name="finetunexlmr.pdf", force_reload=False):
     )
     docs = loader.load()
     
-    # Save to cache
-    DOCS_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(DOCS_CACHE_PATH, 'wb') as f:
-        pickle.dump(docs, f)
-    print("Loaded from API and cached")
+    print(f"Loaded {len(docs)} documents from API")
     
     return docs
 
@@ -82,28 +78,64 @@ def get_embeddings():
         encode_kwargs={'normalize_embeddings': True}
     )
 
-def setup_vectorstore(chunked_docs, embeddings, force_recreate=True):
+def setup_vectorstore(chunked_docs, embeddings, collection_name=None, force_recreate=True):
     """
     Setup Qdrant vector store.
+    Args:
+        chunked_docs: List of chunked documents
+        embeddings: Embedding model
+        collection_name: Custom collection name (defaults to QDRANT_COLLECTION_NAME)
+        force_recreate: Whether to recreate the collection
     """
+    if collection_name is None:
+        collection_name = QDRANT_COLLECTION_NAME
+    
     vectorstore = Qdrant.from_documents(
         documents=chunked_docs,
         embedding=embeddings,
         url=QDRANT_URL,
         api_key=QDRANT_API_KEY,
-        collection_name=QDRANT_COLLECTION_NAME,
+        collection_name=collection_name,
         force_recreate=force_recreate,
     )
-    print(f"Added {len(chunked_docs)} documents to Qdrant collection '{QDRANT_COLLECTION_NAME}'")
+    print(f"Added {len(chunked_docs)} documents to Qdrant collection '{collection_name}'")
     return vectorstore
 
-def get_vectorstore(embeddings):
+def get_vectorstore(embeddings, collection_name=None):
     """
     Get existing vector store instance.
+    Args:
+        embeddings: Embedding model
+        collection_name: Custom collection name (defaults to QDRANT_COLLECTION_NAME)
     """
+    if collection_name is None:
+        collection_name = QDRANT_COLLECTION_NAME
+    
     return Qdrant.from_existing_collection(
         embedding=embeddings,
-        collection_name=QDRANT_COLLECTION_NAME,
+        collection_name=collection_name,
         url=QDRANT_URL,
         api_key=QDRANT_API_KEY,
     )
+
+
+def delete_vectorstore(collection_name):
+    """
+    Delete a vector store collection.
+    Args:
+        collection_name: Name of the collection to delete
+    """
+    from qdrant_client import QdrantClient
+    
+    client = QdrantClient(
+        url=QDRANT_URL,
+        api_key=QDRANT_API_KEY,
+    )
+    
+    try:
+        client.delete_collection(collection_name)
+        print(f"Deleted Qdrant collection '{collection_name}'")
+        return True
+    except Exception as e:
+        print(f"Error deleting collection '{collection_name}': {e}")
+        return False
