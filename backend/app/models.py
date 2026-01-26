@@ -42,7 +42,7 @@ class User(BaseModel):
         json_encoders={ObjectId: str}
     )
     
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default_factory=ObjectId, alias="_id")
     user_id: str = Field(..., description="Unique user identifier")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -55,7 +55,7 @@ class Session(BaseModel):
         json_encoders={ObjectId: str}
     )
     
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default_factory=ObjectId, alias="_id")
     session_id: str = Field(..., description="Unique session identifier")
     user_id: str = Field(..., description="User who created this session")
     pdf_filename: str = Field(..., description="Original PDF filename")
@@ -72,7 +72,7 @@ class ChatMessage(BaseModel):
         json_encoders={ObjectId: str}
     )
     
-    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default_factory=ObjectId, alias="_id")
     session_id: str = Field(..., description="Session this message belongs to")
     role: str = Field(..., description="Message role: 'user' or 'assistant'")
     content: str = Field(..., description="Message content")
