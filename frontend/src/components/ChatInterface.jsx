@@ -3,7 +3,7 @@ import { Send, Loader2, User, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { sendChatMessage, getChatHistory } from '../services/api';
 
-export default function ChatInterface({ sessionId, userId, pdfFilename }) {
+export default function ChatInterface({ sessionId, pdfFilename }) {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ export default function ChatInterface({ sessionId, userId, pdfFilename }) {
         setMessages(prev => [...prev, tempUserMessage]);
 
         try {
-            const response = await sendChatMessage(sessionId, userId, userMessage);
+            const response = await sendChatMessage(sessionId, userMessage);
 
             // Add assistant message
             const assistantMessage = {

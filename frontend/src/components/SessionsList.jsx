@@ -1,4 +1,4 @@
-import { FileText, Trash2, Plus, MessageSquare } from 'lucide-react';
+import { FileText, Trash2, Plus, MessageSquare, LogOut } from 'lucide-react';
 import { deleteSession } from '../services/api';
 
 export default function SessionsList({
@@ -7,7 +7,8 @@ export default function SessionsList({
     onSelectSession,
     onNewSession,
     onSessionDeleted,
-    userId
+    onLogout,
+    userEmail
 }) {
     const handleDelete = async (sessionId, e) => {
         e.stopPropagation();
@@ -17,12 +18,14 @@ export default function SessionsList({
         }
 
         try {
-            await deleteSession(sessionId, userId);
+            await deleteSession(sessionId);
             onSessionDeleted(sessionId);
         } catch (err) {
             alert('Failed to delete session: ' + (err.response?.data?.detail || err.message));
         }
     };
+    // ... (middle parts unchanged, or I should provide them for replace_file_content)
+
 
     return (
         <div className="w-80 bg-slate-900 border-r border-slate-800 flex flex-col h-full flex-shrink-0">
@@ -118,15 +121,22 @@ export default function SessionsList({
 
             {/* User Profile / Footer */}
             <div className="p-4 border-t border-slate-800">
-                <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div className="flex items-center gap-3 px-2 py-2 mb-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-xs font-bold text-white">
-                        US
+                        {userEmail?.substring(0, 2).toUpperCase() || 'US'}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">Demo User</p>
+                        <p className="text-sm font-medium text-white truncate">{userEmail || 'User'}</p>
                         <p className="text-xs text-slate-500 truncate">Free Plan</p>
                     </div>
                 </div>
+                <button
+                    onClick={onLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                </button>
             </div>
         </div>
     );

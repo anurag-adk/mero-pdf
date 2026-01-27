@@ -10,17 +10,47 @@ const api = axios.create({
     },
 });
 
+// Add request interceptor to include token
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Auth Endpoints
+export const loginUser = async (username, password) => {
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+
+    const response = await api.post('/auth/login', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
+export const signupUser = async (email, password) => {
+    const response = await api.post('/auth/signup', { email, password });
+    return response.data;
+};
+
 /**
  * Upload a PDF file and create a new session
- * @param {string} userId - User identifier
  * @param {File} file - PDF file to upload
  * @returns {Promise} Response with session_id, message, and pdf_filename
  */
-export const uploadPDF = async (userId, file) => {
+export const uploadPDF = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await api.post(`/upload?user_id=${userId}`, formData, {
+    const response = await api.post('/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -30,26 +60,24 @@ export const uploadPDF = async (userId, file) => {
 };
 
 /**
- * Get all sessions for a user
- * @param {string} userId - User identifier
+ * Get all sessions for the authenticated user
  * @returns {Promise} Array of session objects
  */
-export const getUserSessions = async (userId) => {
-    const response = await api.get(`/sessions/${userId}`);
+export const getUserSessions = async () => {
+    const response = await api.get('/sessions');
     return response.data;
 };
 
 /**
  * Send a chat message
  * @param {string} sessionId - Session identifier
- * @param {string} userId - User identifier
  * @param {string} message - User message
  * @returns {Promise} Response with assistant's reply
  */
-export const sendChatMessage = async (sessionId, userId, message) => {
+export const sendChatMessage = async (sessionId, message) => {
     const response = await api.post('/chat', {
         session_id: sessionId,
-        user_id: userId,
+        user_id: "placeholder", // Backend handles real user_id via token, but schema might require it
         message: message,
     });
 
@@ -69,11 +97,10 @@ export const getChatHistory = async (sessionId) => {
 /**
  * Delete a session
  * @param {string} sessionId - Session identifier
- * @param {string} userId - User identifier
  * @returns {Promise} Response with confirmation message
  */
-export const deleteSession = async (sessionId, userId) => {
-    const response = await api.delete(`/session/${sessionId}?user_id=${userId}`);
+export const deleteSession = async (sessionId) => {
+    const response = await api.delete(`/session/${sessionId}`);
     return response.data;
 };
 
