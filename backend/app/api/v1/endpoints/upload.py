@@ -7,21 +7,25 @@ from backend.app.models import User, Session
 from backend.app.schemas import UploadResponse
 from backend.app.services.rag_service import initialize_rag_system
 from backend.app.core.globals import active_chains
+from backend.app.api.deps import get_current_user
+from backend.app.schemas import UploadResponse
+from backend.app.services.rag_service import initialize_rag_system
+from backend.app.core.globals import active_chains
 
 router = APIRouter()
 
 @router.post("/upload", response_model=UploadResponse)
 async def upload_pdf(
-    user_id: str,
     file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
     db=Depends(get_database)
 ):
     """
     Upload a PDF file and create a new chat session.
     
     Args:
-        user_id: User identifier
         file: PDF file to upload
+        current_user: Authenticated user
     
     Returns:
         UploadResponse with session_id and message
@@ -53,11 +57,12 @@ async def upload_pdf(
         # Store chain in memory
         active_chains[session_id] = rag_chain
         
-        # Create or get user
-        user = await db.users.find_one({"user_id": user_id})
-        if not user:
-            user_doc = User(user_id=user_id)
-            await db.users.insert_one(user_doc.dict(by_alias=True))
+        # Create or get user (already authenticated, but ensuring db sync if needed)
+        # In this flow, we rely on the authenticated user.
+        user_id = current_user.user_id
+        
+        # Verify user exists in DB (redundant if get_current_user does it, but keeping logic safe)
+        # get_current_user already fetches the user, so we can just use current_user
         
         # Create session in MongoDB
         session = Session(

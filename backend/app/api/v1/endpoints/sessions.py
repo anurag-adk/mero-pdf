@@ -5,26 +5,22 @@ from backend.app.core.database import get_database
 from backend.app.schemas import SessionResponse, DeleteResponse
 from backend.app.services.utils import delete_vectorstore
 from backend.app.core.globals import active_chains
+from backend.app.api.deps import get_current_user
+from backend.app.models import User
 
 router = APIRouter()
 
-@router.get("/sessions/{user_id}", response_model=List[SessionResponse])
+@router.get("/sessions", response_model=List[SessionResponse])
 async def get_user_sessions(
-    user_id: str,
+    current_user: User = Depends(get_current_user),
     db=Depends(get_database)
 ):
     """
-    Get all sessions for a user.
-    
-    Args:
-        user_id: User identifier
-    
-    Returns:
-        List of SessionResponse objects
+    Get all sessions for the authenticated user.
     """
     try:
         sessions = await db.sessions.find({
-            "user_id": user_id
+            "user_id": current_user.user_id
         }).sort("created_at", -1).to_list(length=100)
         
         # Get message counts for each session
@@ -51,7 +47,7 @@ async def get_user_sessions(
 @router.delete("/session/{session_id}", response_model=DeleteResponse)
 async def delete_session(
     session_id: str,
-    user_id: str,
+    current_user: User = Depends(get_current_user),
     db=Depends(get_database)
 ):
     """
@@ -59,7 +55,7 @@ async def delete_session(
     
     Args:
         session_id: Session identifier
-        user_id: User identifier (for authorization)
+        current_user: Authenticated user
     
     Returns:
         DeleteResponse with confirmation message
@@ -68,7 +64,7 @@ async def delete_session(
         # Verify session exists and belongs to user
         session = await db.sessions.find_one({
             "session_id": session_id,
-            "user_id": user_id
+            "user_id": current_user.user_id
         })
         
         if not session:

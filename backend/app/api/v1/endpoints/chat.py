@@ -3,8 +3,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from langchain_core.messages import AIMessage, HumanMessage
 
 from backend.app.core.database import get_database
-from backend.app.models import ChatMessage
+from backend.app.models import ChatMessage, User
 from backend.app.schemas import ChatRequest, ChatResponse, ChatHistoryResponse, MessageResponse
+from backend.app.services.rag_service import initialize_rag_system, query_rag
+from backend.app.core.globals import active_chains
+from backend.app.api.deps import get_current_user
 from backend.app.services.rag_service import initialize_rag_system, query_rag
 from backend.app.core.globals import active_chains
 
@@ -13,6 +16,7 @@ router = APIRouter()
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
+    current_user: User = Depends(get_current_user),
     db=Depends(get_database)
 ):
     """
@@ -20,6 +24,7 @@ async def chat(
     
     Args:
         request: ChatRequest with session_id, user_id, and message
+        current_user: Authenticated user
     
     Returns:
         ChatResponse with assistant's reply
@@ -28,7 +33,7 @@ async def chat(
         # Verify session exists and belongs to user
         session = await db.sessions.find_one({
             "session_id": request.session_id,
-            "user_id": request.user_id
+            "user_id": current_user.user_id
         })
         
         if not session:
@@ -92,6 +97,7 @@ async def chat(
 @router.get("/chat-history/{session_id}", response_model=ChatHistoryResponse)
 async def get_chat_history(
     session_id: str,
+    current_user: User = Depends(get_current_user),
     db=Depends(get_database)
 ):
     """
@@ -99,13 +105,17 @@ async def get_chat_history(
     
     Args:
         session_id: Session identifier
+        current_user: Authenticated user
     
     Returns:
         ChatHistoryResponse with all messages
     """
     try:
-        # Verify session exists
-        session = await db.sessions.find_one({"session_id": session_id})
+        # Verify session exists and belongs to user
+        session = await db.sessions.find_one({
+            "session_id": session_id,
+            "user_id": current_user.user_id
+        })
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
         

@@ -1,3 +1,4 @@
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Optional
 from backend.app.core.config import MONGODB_URI
@@ -10,7 +11,10 @@ class Database:
     async def connect_db(cls):
         """Connect to MongoDB"""
         if cls.client is None:
-            cls.client = AsyncIOMotorClient(MONGODB_URI)
+            cls.client = AsyncIOMotorClient(
+                MONGODB_URI,
+                tlsCAFile=certifi.where()
+            )
             print("Connected to MongoDB")
     
     @classmethod
