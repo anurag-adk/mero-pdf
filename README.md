@@ -77,12 +77,7 @@ cd mero_pdf
 
 ### Backend Setup
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Create and activate a virtual environment:
+1. Create and activate a virtual environment on root directory:
    ```bash
    # Linux/macOS
    python3 -m venv venv
@@ -93,7 +88,7 @@ cd mero_pdf
    venv\Scripts\activate
    ```
 
-3. Configure environment variables in `.env` at the project root:
+2. Configure environment variables in `.env` at the project root:
    ```env
    UNSTRUCTURED_API_KEY=your_key
    GROQ_API_KEY=your_key
@@ -102,7 +97,7 @@ cd mero_pdf
    MONGODB_URI=your_mongodb_uri
    ```
 
-4. Install Python dependencies:
+3. Install Python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
