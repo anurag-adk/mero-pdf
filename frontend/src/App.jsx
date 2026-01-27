@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import FileUpload from './components/FileUpload';
 import SessionsList from './components/SessionsList';
 import ChatInterface from './components/ChatInterface';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { getUserSessions } from './services/api';
 
-// Hardcoded user ID for demo purposes
-const USER_ID = 'demo-user-123';
-
-function App() {
+const MainApp = () => {
+  const { logout, user } = useAuth();
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
   const [isLoadingSessions, setIsLoadingSessions] = useState(true);
@@ -20,7 +23,7 @@ function App() {
   const fetchSessions = async () => {
     setIsLoadingSessions(true);
     try {
-      const userSessions = await getUserSessions(USER_ID);
+      const userSessions = await getUserSessions();
       setSessions(userSessions);
 
       // If there's an active session, make sure it still exists
@@ -53,42 +56,49 @@ function App() {
 
   const activeSession = sessions.find(s => s.session_id === activeSessionId);
 
-  // Show upload screen if no active session
-  if (!activeSessionId) {
-    return (
-      <div className="flex h-screen">
-        {sessions.length > 0 && (
-          <SessionsList
-            sessions={sessions}
-            activeSessionId={activeSessionId}
-            onSelectSession={setActiveSessionId}
-            onNewSession={handleNewSession}
-            onSessionDeleted={handleSessionDeleted}
-            userId={USER_ID}
-          />
-        )}
-        <FileUpload userId={USER_ID} onUploadSuccess={handleUploadSuccess} />
-      </div>
-    );
-  }
-
-  // Show chat interface with sessions sidebar
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-slate-900">
       <SessionsList
         sessions={sessions}
         activeSessionId={activeSessionId}
         onSelectSession={setActiveSessionId}
         onNewSession={handleNewSession}
         onSessionDeleted={handleSessionDeleted}
-        userId={USER_ID}
+        onLogout={logout}
+        userEmail={user?.email}
       />
-      <ChatInterface
-        sessionId={activeSessionId}
-        userId={USER_ID}
-        pdfFilename={activeSession?.pdf_filename || 'PDF Chat'}
-      />
+
+      {!activeSessionId ? (
+        <FileUpload onUploadSuccess={handleUploadSuccess} />
+      ) : (
+        <ChatInterface
+          sessionId={activeSessionId}
+          pdfFilename={activeSession?.pdf_filename || 'PDF Chat'}
+        />
+      )}
     </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainApp />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

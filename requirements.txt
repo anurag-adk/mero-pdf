@@ -16,6 +16,9 @@ qdrant-client == 1.7.3
 fastapi
 uvicorn[standard]
 python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+email-validator
 aiofiles
 
 # MongoDB

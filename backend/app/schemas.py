@@ -1,6 +1,9 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional, Any
 from datetime import datetime
+
+# Import PyObjectId from models to reuse it
+from backend.app.models import PyObjectId
 
 
 class UploadResponse(BaseModel):
@@ -51,3 +54,35 @@ class DeleteResponse(BaseModel):
     """Response for delete operations"""
     message: str
     session_id: str
+
+
+class UserBase(BaseModel):
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class UserLogin(UserBase):
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: Optional[str] = None
+
+
+class UserResponse(UserBase):
+    id: PyObjectId = Field(alias="_id")
+    user_id: str
+    created_at: datetime
+    
+    model_config = ConfigDict(
+        populate_by_name=True,
+        from_attributes=True
+    )

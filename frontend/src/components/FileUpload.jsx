@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileText, Loader2 } from 'lucide-react';
 import { uploadPDF } from '../services/api';
 
-export default function FileUpload({ userId, onUploadSuccess }) {
+export default function FileUpload({ onUploadSuccess }) {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
@@ -44,7 +44,7 @@ export default function FileUpload({ userId, onUploadSuccess }) {
         setError(null);
 
         try {
-            const response = await uploadPDF(userId, file);
+            const response = await uploadPDF(file);
             onUploadSuccess(response);
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to upload PDF');

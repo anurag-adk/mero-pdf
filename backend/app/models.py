@@ -44,6 +44,8 @@ class User(BaseModel):
     
     id: Optional[PyObjectId] = Field(default_factory=ObjectId, alias="_id")
     user_id: str = Field(..., description="Unique user identifier")
+    email: str = Field(..., description="User email address")
+    hashed_password: str = Field(..., description="Hashed password")
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
