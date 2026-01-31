@@ -43,7 +43,8 @@ async def chat(
         if request.session_id not in active_chains:
             print(f"Loading RAG chain for session {request.session_id}...")
             rag_chain = initialize_rag_system(
-                collection_name=session['qdrant_collection_name']
+                collection_name=session['qdrant_collection_name'],
+                file_path=session.get('pdf_path')
             )
             active_chains[request.session_id] = rag_chain
         else:

@@ -11,6 +11,7 @@ from backend.app.api.deps import get_current_user
 from backend.app.schemas import UploadResponse
 from backend.app.services.rag_service import initialize_rag_system
 from backend.app.core.globals import active_chains
+from backend.app.services.azure_service import azure_storage
 
 router = APIRouter()
 
@@ -46,6 +47,7 @@ async def upload_pdf(
         # Create Qdrant collection name for this session
         collection_name = f"session_{session_id}"
         
+        
         # Initialize RAG system for this session
         print(f"Processing PDF for session {session_id}...")
         rag_chain = initialize_rag_system(
@@ -54,6 +56,13 @@ async def upload_pdf(
             force_reload=True
         )
         
+        # Upload to Azure Blob Storage
+        print(f"Uploading to Azure Blob Storage...")
+        # Reset file pointer since it was read for local save
+        await file.seek(0)
+        azure_url = await azure_storage.upload_file(file, filename=f"{session_id}_{file.filename}")
+        print(f"Uploaded to Azure: {azure_url}")
+
         # Store chain in memory
         active_chains[session_id] = rag_chain
         
@@ -69,11 +78,16 @@ async def upload_pdf(
             session_id=session_id,
             user_id=user_id,
             pdf_filename=file.filename,
-            pdf_path=str(file_path),
+            pdf_path=azure_url, # Store Azure URL
             qdrant_collection_name=collection_name
         )
         await db.sessions.insert_one(session.dict(by_alias=True))
         
+        # Clean up local file
+        if file_path.exists():
+            file_path.unlink()
+            print("Cleaned up local file")
+
         return UploadResponse(
             session_id=session_id,
             message="PDF uploaded and processed successfully",
