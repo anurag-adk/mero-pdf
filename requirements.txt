@@ -24,3 +24,6 @@ aiofiles
 # MongoDB
 motor
 pymongo
+
+# cloud
+azure-storage-blob
