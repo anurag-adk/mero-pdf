@@ -11,6 +11,8 @@ GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 QDRANT_URL = os.getenv('QDRANT_URL')
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
 MONGODB_URI = os.getenv('MONGODB_URI')
+AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+AZURE_CONTAINER_NAME = os.getenv('AZURE_CONTAINER_NAME')
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent

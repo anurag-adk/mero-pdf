@@ -72,7 +72,7 @@ def initialize_rag_system(file_path=None, collection_name=None, force_reload=Fal
     """
     Initialize the RAG system for a specific session.
     Args:
-        file_path: Path to the PDF file
+        file_path: Path to the PDF file (local path or Azure Blob URL)
         collection_name: Qdrant collection name for this session
         force_reload: Force reload from API
     Returns:
@@ -86,28 +86,52 @@ def initialize_rag_system(file_path=None, collection_name=None, force_reload=Fal
         try:
             vectorstore = get_vectorstore(embeddings, collection_name)
             print(f"Using existing vector store: {collection_name}")
+            return setup_chain(vectorstore)
         except Exception as e:
             print(f"Error loading existing vectorstore: {e}")
-            # Create new vectorstore
-            if file_path:
-                docs = load_documents(file_path=file_path, force_reload=force_reload)
-                chunked_docs = split_documents(docs)
-                vectorstore = setup_vectorstore(chunked_docs, embeddings, collection_name=collection_name)
-            else:
-                raise Exception("file_path required to create new vectorstore")
-    else:
-        # No collection name provided, create with default or from file
-        if file_path:
-            docs = load_documents(file_path=file_path, force_reload=force_reload)
+            if not file_path:
+                 raise Exception("file_path required to create new vectorstore")
+
+    # Connect to Azure if needed
+    temp_file_path = None
+    process_path = file_path
+
+    try:
+        if file_path and (str(file_path).startswith('http://') or str(file_path).startswith('https://')):
+            # It's a URL, download from Azure
+            from backend.app.services.azure_service import azure_storage
+            from backend.app.core.config import UPLOADS_DIR
+            import uuid
+            
+            # Create a localized temp file path
+            local_filename = f"temp_{uuid.uuid4()}.pdf"
+            temp_file_path = UPLOADS_DIR / local_filename
+            
+            print(f"Downloading remote file to {temp_file_path}...")
+            azure_storage.download_file(str(file_path), str(temp_file_path))
+            process_path = temp_file_path
+
+        # Load and process documents
+        if process_path:
+            docs = load_documents(file_path=process_path, force_reload=force_reload)
         else:
             docs = load_documents(force_reload=force_reload)
+            
         chunked_docs = split_documents(docs)
         vectorstore = setup_vectorstore(chunked_docs, embeddings, collection_name=collection_name)
 
-    chain = setup_chain(vectorstore)
-    print("RAG system initialized successfully!\n")
-    
-    return chain
+        chain = setup_chain(vectorstore)
+        print("RAG system initialized successfully!\n")
+        return chain
+
+    finally:
+        # cleanup temp file if we created one
+        if temp_file_path and temp_file_path.exists():
+            try:
+                temp_file_path.unlink()
+                print("Cleaned up temporary file")
+            except Exception as e:
+                print(f"Error deleting temp file: {e}")
 
 def query_rag(chain, query, chat_history):
     """
