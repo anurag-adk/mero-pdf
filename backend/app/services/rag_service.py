@@ -44,10 +44,13 @@ def setup_chain(vectorstore):
 
     # Answer question prompt
     system_prompt = (
-        "Instructions:\n"
-        "1. Use the provided context to answer the user's query\n"
-        "2. If the context contains related information, use it to answer as best as you can\n"
-        "3. Only say you don't have information if the context is completely unrelated\n"
+       "Instructions:\n"
+        "1. Use ONLY the provided context to answer the user's query.\n"
+        "2. Extract the answer strictly from the context. Do NOT infer, assume, or add missing details.\n"
+        "3. Do NOT use external knowledge.\n"
+        "4. You may rewrite the extracted content to improve grammar, clarity, and formatting, but DO NOT add new information.\n"
+        "5. Present the answer in a clean, well-structured format using proper sentences and bullet points where necessary.\n"
+        "6. If the answer is not explicitly present, reply exactly: \"The provided context does not contain this information.\"\n"
         "\n"
         "{context}"
     )

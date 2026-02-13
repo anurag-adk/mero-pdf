@@ -1,5 +1,6 @@
 import os
 import pickle
+# from langchain.schema import Document
 from langchain_unstructured import UnstructuredLoader
 from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -16,6 +17,12 @@ from backend.app.core.config import (
     CHUNK_SIZE,
     CHUNK_OVERLAP
 )
+
+class DocumentClass:
+    def __init__(self, page_content: str, metadata: dict = None):
+        self.page_content = page_content
+        self.metadata = metadata or {}
+
 
 def load_documents(file_path=None, force_reload=False):
     """
@@ -54,19 +61,36 @@ def load_documents(file_path=None, force_reload=False):
     
     return docs
 
-def split_documents(docs):
+def split_documents(docs, merge_pages=True):
     """
     Split documents into chunks.
+
+    For tiny docs, merging all pages first and then splitting helps create larger chunks, 
+    which works better for similarity search since we usually select only a few chunks.
+    
+    Args:
+        docs: List of Document objects (each page may be a separate doc)
+        merge_pages: If True, merge all docs before splitting
+
+    Returns:
+        List of chunked Document objects
     """
+    if merge_pages:
+        full_text = "\n".join([doc.page_content.strip() for doc in docs if doc.page_content.strip()])
+        docs_to_split = [DocumentClass(page_content=full_text, metadata={})]
+    else:
+        docs_to_split = docs
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
         separators=["\n\n", "\n", ". ", "? ", "! ", "; ", " ", ""],
         length_function=len,
     )
-    chunked_docs = text_splitter.split_documents(docs)
+    chunked_docs = text_splitter.split_documents(docs_to_split)
     print(f"Split {len(docs)} documents into {len(chunked_docs)} chunks")
     return chunked_docs
+
 
 def get_embeddings():
     """
