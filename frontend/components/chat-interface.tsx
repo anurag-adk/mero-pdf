@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
-import { FileText, Loader2, Send } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { FileText, Loader2, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
 }
 
 interface ChatInterfaceProps {
-  messages: Message[]
-  fileName: string
-  onSendMessage: (message: string) => Promise<void>
-  isLoading?: boolean
+  messages: Message[];
+  fileName: string;
+  onSendMessage: (message: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export function ChatInterface({
@@ -29,39 +29,59 @@ export function ChatInterface({
   onSendMessage,
   isLoading = false,
 }: ChatInterfaceProps) {
-  const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollButton(false);
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
+
+  // Handle scroll to show/hide button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollHeight, scrollTop, clientHeight } = container;
+      // Show button if scrolled up more than 100px from bottom
+      setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isSending) return
+    e.preventDefault();
+    if (!input.trim() || isSending) return;
 
-    const message = input.trim()
-    setInput('')
-    setIsSending(true)
+    const message = input.trim();
+    setInput("");
+    setIsSending(true);
 
     try {
-      await onSendMessage(message)
+      await onSendMessage(message);
     } catch (error) {
-      console.error('[v0] Error sending message:', error)
+      console.error("[v0] Error sending message:", error);
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit(e)
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
-  }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -72,12 +92,17 @@ export function ChatInterface({
         </div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">{fileName}</h2>
-          <p className="text-xs text-muted-foreground">Ask anything about this document</p>
+          <p className="text-xs text-muted-foreground">
+            Ask anything about this document
+          </p>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-6" ref={scrollRef}>
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 sm:p-6 relative"
+      >
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
             <div className="flex h-full items-center justify-center py-12">
@@ -85,9 +110,12 @@ export function ChatInterface({
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                   <FileText className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Ready to chat!</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Ready to chat!
+                </h3>
                 <p className="mt-2 text-sm text-muted-foreground text-pretty">
-                  Ask me anything about the document and I'll help you find answers.
+                  Ask me anything about the document and I'll help you find
+                  answers.
                 </p>
               </div>
             </div>
@@ -97,28 +125,40 @@ export function ChatInterface({
             <div
               key={message.id}
               className={cn(
-                'flex gap-3',
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+                "flex gap-3 animate-fade-in",
+                message.role === "user" ? "justify-end" : "justify-start",
               )}
             >
-              {message.role === 'assistant' && (
+              {message.role === "assistant" && (
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
               )}
-              <div
-                className={cn(
-                  'max-w-[80%] rounded-lg px-4 py-3',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
-                )}
-              >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              <div className="flex flex-col gap-1">
+                <div
+                  className={cn(
+                    "max-w-[95%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[80%] rounded-xl px-4 py-3 shadow-sm transition-smooth",
+                    message.role === "user"
+                      ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-none"
+                      : "bg-gradient-to-br from-card to-muted text-foreground rounded-bl-none border border-border/50 shadow-sm",
+                  )}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground px-2">
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
               </div>
-              {message.role === 'user' && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted flex-shrink-0">
-                  <span className="text-xs font-semibold text-foreground">You</span>
+              {message.role === "user" && (
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                  <span className="text-xs font-semibold text-foreground">
+                    You
+                  </span>
                 </div>
               )}
             </div>
@@ -134,8 +174,33 @@ export function ChatInterface({
               </div>
             </div>
           )}
+
+          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+
+        {/* Scroll to bottom button */}
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="fixed bottom-32 right-8 lg:right-10 z-10 rounded-full bg-primary text-primary-foreground p-3 shadow-lg transition-smooth hover:shadow-xl hover:scale-110 animate-fade-in"
+            aria-label="Scroll to bottom"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {/* Input */}
       <div className="border-t border-border bg-card p-4">
@@ -165,5 +230,5 @@ export function ChatInterface({
         </form>
       </div>
     </div>
-  )
+  );
 }

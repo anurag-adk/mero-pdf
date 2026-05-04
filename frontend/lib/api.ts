@@ -138,7 +138,7 @@ class ApiService {
   }
 
   async getSessions(userId: string): Promise<SessionResponse[]> {
-    const response = await fetch(`${API_URL}/sessions/${userId}`, {
+    const response = await fetch(`${API_URL}/sessions`, {
       headers: this.getAuthHeader(),
     });
 
