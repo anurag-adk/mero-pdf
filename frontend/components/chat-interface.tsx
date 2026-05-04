@@ -31,15 +31,33 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setShowScrollButton(false);
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle scroll to show/hide button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollHeight, scrollTop, clientHeight } = container;
+      // Show button if scrolled up more than 100px from bottom
+      setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +99,10 @@ export function ChatInterface({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto p-4 sm:p-6 relative"
+      >
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
             <div className="flex h-full items-center justify-center py-12">
@@ -104,7 +125,7 @@ export function ChatInterface({
             <div
               key={message.id}
               className={cn(
-                "flex gap-3",
+                "flex gap-3 animate-fade-in",
                 message.role === "user" ? "justify-end" : "justify-start",
               )}
             >
@@ -113,20 +134,28 @@ export function ChatInterface({
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
               )}
-              <div
-                className={cn(
-                  "max-w-[80%] rounded-lg px-4 py-3",
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground",
-                )}
-              >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
+              <div className="flex flex-col gap-1">
+                <div
+                  className={cn(
+                    "max-w-[95%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[80%] rounded-xl px-4 py-3 shadow-sm transition-smooth",
+                    message.role === "user"
+                      ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-none"
+                      : "bg-gradient-to-br from-card to-muted text-foreground rounded-bl-none border border-border/50 shadow-sm",
+                  )}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground px-2">
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
               </div>
               {message.role === "user" && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted flex-shrink-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
                   <span className="text-xs font-semibold text-foreground">
                     You
                   </span>
@@ -148,6 +177,29 @@ export function ChatInterface({
 
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Scroll to bottom button */}
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="fixed bottom-32 right-8 lg:right-10 z-10 rounded-full bg-primary text-primary-foreground p-3 shadow-lg transition-smooth hover:shadow-xl hover:scale-110 animate-fade-in"
+            aria-label="Scroll to bottom"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Input */}

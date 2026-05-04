@@ -6,9 +6,11 @@ import { PdfUpload } from "@/components/pdf-upload";
 import { LoginPage } from "@/components/login-page";
 import { SignupPage } from "@/components/signup-page";
 import { UserProfile } from "@/components/user-profile";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { Menu, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -19,14 +21,70 @@ export default function Home() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [isUploadingPDF, setIsUploadingPDF] = useState(false);
 
-  // Load sessions from backend
+  // Restore sidebar collapse state from localStorage
+  useEffect(() => {
+    const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
+    if (savedCollapsedState !== null) {
+      setIsSidebarCollapsed(JSON.parse(savedCollapsedState));
+    }
+  }, []);
+
+  // Save sidebar collapse state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
+
+  // Restore messages from localStorage on mount (for local cache)
+  useEffect(() => {
+    const savedMessages = localStorage.getItem("messages");
+    if (savedMessages) {
+      try {
+        const parsed = JSON.parse(savedMessages);
+        setMessages(parsed);
+      } catch (e) {
+        console.error("Failed to parse saved messages:", e);
+      }
+    }
+  }, []);
+
+  // Restore active session from localStorage on mount
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem("activeSessionId");
+    if (savedSessionId) {
+      setActiveSessionId(savedSessionId);
+    }
+  }, []);
+
+  // Save active session to localStorage
+  useEffect(() => {
+    if (activeSessionId && user?.user_id) {
+      localStorage.setItem("activeSessionId", activeSessionId);
+      localStorage.setItem("userId", user.user_id);
+    }
+  }, [activeSessionId, user?.user_id]);
+
+  // Save messages to localStorage
+  useEffect(() => {
+    localStorage.setItem("messages", JSON.stringify(messages));
+  }, [messages]);
+
+  // Load sessions from backend with fallback
   useEffect(() => {
     if (user) {
       loadSessions();
+    } else {
+      // Clear data on logout
+      setSessions([]);
+      setActiveSessionId(null);
+      setMessages({});
+      localStorage.removeItem("activeSessionId");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("sessions_cache");
     }
   }, [user]);
 
@@ -52,8 +110,30 @@ export default function Home() {
         }),
       );
       setSessions(formattedSessions);
+      // Cache sessions for offline/fallback use
+      localStorage.setItem("sessions_cache", JSON.stringify(backendSessions));
     } catch (error) {
-      console.error("Failed to load sessions:", error);
+      console.error("Failed to load sessions from backend:", error);
+
+      // Fallback: Try to restore from cached sessions
+      const cachedSessions = localStorage.getItem("sessions_cache");
+      if (cachedSessions) {
+        try {
+          const parsed = JSON.parse(cachedSessions);
+          const formattedSessions: ChatSession[] = parsed.map(
+            (session: any) => ({
+              id: session.session_id,
+              name: `Chat - ${session.pdf_filename}`,
+              fileName: session.pdf_filename,
+              createdAt: new Date(session.created_at),
+            }),
+          );
+          setSessions(formattedSessions);
+          console.warn("Restored sessions from cache due to API failure");
+        } catch (e) {
+          console.error("Failed to parse cached sessions:", e);
+        }
+      }
     } finally {
       setIsLoadingSessions(false);
     }
@@ -213,61 +293,87 @@ export default function Home() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Mobile sidebar toggle */}
-      <div className="fixed left-4 top-4 z-50 lg:hidden">
-        <Button
-          size="icon"
-          variant="outline"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="h-10 w-10"
-        >
-          {sidebarOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
-      {/* User profile */}
-      <div className="fixed right-4 top-4 z-50">
-        <UserProfile />
-      </div>
-
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <div className="fixed inset-y-0 left-0 z-40 lg:relative lg:z-0">
-          <ChatSidebar
-            sessions={sessions}
-            activeSessionId={activeSessionId}
-            onSessionSelect={handleSessionSelect}
-            onNewSession={handleNewSession}
-            onDeleteSession={handleDeleteSession}
-            isLoading={isLoadingSessions}
-          />
-        </div>
-      )}
-
-      {/* Backdrop for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+      {/* Sidebar Desktop */}
+      <div
+        className={cn(
+          "hidden lg:flex lg:flex-col lg:border-r lg:border-border transition-smooth bg-card",
+          isSidebarCollapsed ? "lg:w-20" : "lg:w-64"
+        )}
+      >
+        <ChatSidebar
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          onSessionSelect={handleSessionSelect}
+          onNewSession={handleNewSession}
+          onDeleteSession={handleDeleteSession}
+          isLoading={isLoadingSessions}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
+      </div>
+
+      {/* Sidebar Mobile */}
+      {sidebarOpen && (
+        <>
+          <div className="fixed inset-y-0 left-0 z-40 w-64 lg:hidden overflow-hidden">
+            <ChatSidebar
+              sessions={sessions}
+              activeSessionId={activeSessionId}
+              onSessionSelect={handleSessionSelect}
+              onNewSession={handleNewSession}
+              onDeleteSession={handleDeleteSession}
+              isLoading={isLoadingSessions}
+              isCollapsed={false}
+            />
+          </div>
+          <div
+            className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        </>
       )}
 
       {/* Main content */}
-      <div className="flex-1 overflow-hidden">
-        {activeSession ? (
-          <ChatInterface
-            messages={messages[activeSessionId!] || []}
-            fileName={activeSession.fileName}
-            onSendMessage={handleSendMessage}
-            isLoading={isSendingMessage}
-          />
-        ) : (
-          <PdfUpload onUpload={handleUpload} isUploading={isUploadingPDF} />
-        )}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Top bar with toggle and profile */}
+        <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="h-9 w-9"
+          >
+            {sidebarOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserProfile />
+          </div>
+        </div>
+
+        {/* Desktop top bar just profile */}
+        <div className="hidden lg:flex lg:items-center lg:justify-end lg:gap-2 border-b border-border bg-card px-4 py-3">
+          <ThemeToggle />
+          <UserProfile />
+        </div>
+
+        {/* Content area */}
+        <div className="flex-1 overflow-hidden">
+          {activeSession ? (
+            <ChatInterface
+              messages={messages[activeSessionId!] || []}
+              fileName={activeSession.fileName}
+              onSendMessage={handleSendMessage}
+              isLoading={isSendingMessage}
+            />
+          ) : (
+            <PdfUpload onUpload={handleUpload} isUploading={isUploadingPDF} />
+          )}
+        </div>
       </div>
     </div>
   );
