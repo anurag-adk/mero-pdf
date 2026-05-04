@@ -74,7 +74,8 @@ export function ChatSidebar({
                   onClick={() => onSessionSelect(session.id)}
                   className={cn(
                     "w-full rounded-lg p-2 transition-smooth flex items-center justify-center hover:bg-muted/50",
-                    activeSessionId === session.id && "bg-primary/15 border border-primary/30"
+                    activeSessionId === session.id &&
+                      "bg-primary/15 border border-primary/30",
                   )}
                   title={session.name}
                 >
@@ -83,7 +84,7 @@ export function ChatSidebar({
                       "h-5 w-5",
                       activeSessionId === session.id
                         ? "text-primary"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   />
                 </button>
@@ -108,14 +109,14 @@ export function ChatSidebar({
 
   // Full sidebar mode
   return (
-    <div className="flex h-full w-64 flex-col border-r border-border bg-card">
+    <div className="flex h-full w-80 flex-col border-r border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-4 gap-2">
         <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
         <div className="flex gap-2">
           <Button
             size="sm"
             onClick={onNewSession}
-            className="h-8 w-8 p-0 transition-smooth"
+            className="h-8 w-8 p-0 transition-smooth hover:bg-primary/20"
             title="New session"
           >
             <Plus className="h-4 w-4" />
@@ -125,7 +126,7 @@ export function ChatSidebar({
               size="sm"
               variant="ghost"
               onClick={onToggleCollapse}
-              className="h-8 w-8 p-0 transition-smooth"
+              className="h-8 w-8 p-0 transition-smooth hover:bg-muted/50"
               title="Collapse sidebar"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -158,36 +159,37 @@ export function ChatSidebar({
               <div
                 key={session.id}
                 className={cn(
-                  "group relative flex items-start gap-3 rounded-xl px-4 py-3 transition-smooth shadow-sm border border-transparent hover:border-primary/20",
+                  "group relative flex items-start gap-3 rounded-lg px-3 py-3 transition-smooth border border-transparent",
                   activeSessionId === session.id
-                    ? "bg-gradient-to-r from-primary/15 to-accent/10 border-primary/30 shadow-md"
-                    : "hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5"
+                    ? "bg-gradient-to-r from-primary/20 to-accent/10 border-primary/40 shadow-sm"
+                    : "hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/5 hover:border-primary/20",
                 )}
               >
                 <button
                   onClick={() => onSessionSelect(session.id)}
-                  className="flex flex-1 items-start gap-3 text-left"
+                  className="flex flex-1 items-start gap-3 text-left min-w-0"
+                  title={`${session.name} - ${session.fileName}`}
                 >
                   <MessageSquare
                     className={cn(
-                      "h-4 w-4 mt-0.5 flex-shrink-0 transition-colors",
+                      "h-5 w-5 mt-0.5 flex-shrink-0 transition-colors",
                       activeSessionId === session.id
                         ? "text-primary"
-                        : "text-muted-foreground"
+                        : "text-muted-foreground",
                     )}
                   />
                   <div className="flex-1 min-w-0">
                     <p
                       className={cn(
-                        "text-sm font-medium truncate transition-colors",
+                        "text-sm font-medium text-foreground break-words leading-tight transition-colors",
                         activeSessionId === session.id
                           ? "text-primary font-semibold"
-                          : "text-foreground"
+                          : "text-foreground",
                       )}
                     >
                       {session.name}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground break-words leading-tight mt-1">
                       {session.fileName}
                     </p>
                   </div>
@@ -199,7 +201,7 @@ export function ChatSidebar({
                     e.stopPropagation();
                     onDeleteSession(session.id);
                   }}
-                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>

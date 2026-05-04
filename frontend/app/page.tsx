@@ -300,7 +300,7 @@ export default function Home() {
       <div
         className={cn(
           "hidden lg:flex lg:flex-col lg:border-r lg:border-border transition-smooth bg-card",
-          isSidebarCollapsed ? "lg:w-20" : "lg:w-64",
+          isSidebarCollapsed ? "lg:w-20" : "lg:w-80",
         )}
       >
         <ChatSidebar
@@ -318,7 +318,7 @@ export default function Home() {
       {/* Sidebar Mobile */}
       {sidebarOpen && (
         <>
-          <div className="fixed inset-y-0 left-0 z-40 w-64 lg:hidden overflow-hidden">
+          <div className="fixed inset-y-0 left-0 z-40 w-80 lg:hidden overflow-hidden">
             <ChatSidebar
               sessions={sessions}
               activeSessionId={activeSessionId}
