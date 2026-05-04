@@ -1,190 +1,197 @@
-'use client'
+"use client";
 
-import { ChatInterface, type Message } from '@/components/chat-interface'
-import { ChatSidebar, type ChatSession } from '@/components/chat-sidebar'
-import { PdfUpload } from '@/components/pdf-upload'
-import { LoginPage } from '@/components/login-page'
-import { SignupPage } from '@/components/signup-page'
-import { UserProfile } from '@/components/user-profile'
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/auth-context'
-import { api } from '@/lib/api'
-import { Menu, X, Loader2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ChatInterface, type Message } from "@/components/chat-interface";
+import { ChatSidebar, type ChatSession } from "@/components/chat-sidebar";
+import { PdfUpload } from "@/components/pdf-upload";
+import { LoginPage } from "@/components/login-page";
+import { SignupPage } from "@/components/signup-page";
+import { UserProfile } from "@/components/user-profile";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth-context";
+import { api } from "@/lib/api";
+import { Menu, X, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const { user, isLoading } = useAuth()
-  const [authView, setAuthView] = useState<'login' | 'signup'>('login')
-  const [sessions, setSessions] = useState<ChatSession[]>([])
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
-  const [messages, setMessages] = useState<Record<string, Message[]>>({})
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false)
-  const [isSendingMessage, setIsSendingMessage] = useState(false)
-  const [isUploadingPDF, setIsUploadingPDF] = useState(false)
+  const { user, isLoading } = useAuth();
+  const [authView, setAuthView] = useState<"login" | "signup">("login");
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Record<string, Message[]>>({});
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [isUploadingPDF, setIsUploadingPDF] = useState(false);
 
   // Load sessions from backend
   useEffect(() => {
     if (user) {
-      loadSessions()
+      loadSessions();
     }
-  }, [user])
+  }, [user]);
 
   // Load messages when active session changes
   useEffect(() => {
     if (activeSessionId && !messages[activeSessionId]) {
-      loadChatHistory(activeSessionId)
+      loadChatHistory(activeSessionId);
     }
-  }, [activeSessionId])
+  }, [activeSessionId]);
 
   const loadSessions = async () => {
-    if (!user) return
-    
-    setIsLoadingSessions(true)
+    if (!user) return;
+
+    setIsLoadingSessions(true);
     try {
-      const backendSessions = await api.getSessions(user.user_id)
-      const formattedSessions: ChatSession[] = backendSessions.map((session) => ({
-        id: session.session_id,
-        name: `Chat - ${session.pdf_filename}`,
-        fileName: session.pdf_filename,
-        createdAt: new Date(session.created_at),
-      }))
-      setSessions(formattedSessions)
+      const backendSessions = await api.getSessions(user.user_id);
+      const formattedSessions: ChatSession[] = backendSessions.map(
+        (session) => ({
+          id: session.session_id,
+          name: `Chat - ${session.pdf_filename}`,
+          fileName: session.pdf_filename,
+          createdAt: new Date(session.created_at),
+        }),
+      );
+      setSessions(formattedSessions);
     } catch (error) {
-      console.error('Failed to load sessions:', error)
+      console.error("Failed to load sessions:", error);
     } finally {
-      setIsLoadingSessions(false)
+      setIsLoadingSessions(false);
     }
-  }
+  };
 
   const loadChatHistory = async (sessionId: string) => {
     try {
-      const history = await api.getChatHistory(sessionId)
-      const formattedMessages: Message[] = history.messages.map((msg) => ({
+      const history = await api.getChatHistory(sessionId);
+      const formattedMessages: Message[] = history.map((msg) => ({
         id: crypto.randomUUID(),
-        role: msg.role as 'user' | 'assistant',
+        role: msg.role as "user" | "assistant",
         content: msg.content,
         timestamp: new Date(msg.timestamp),
-      }))
+      }));
       setMessages((prev) => ({
         ...prev,
         [sessionId]: formattedMessages,
-      }))
+      }));
     } catch (error) {
-      console.error('Failed to load chat history:', error)
+      console.error("Failed to load chat history:", error);
       // Initialize empty messages array if history fails to load
       setMessages((prev) => ({
         ...prev,
         [sessionId]: [],
-      }))
+      }));
     }
-  }
+  };
 
-  const activeSession = sessions.find((s) => s.id === activeSessionId)
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
 
   const handleUpload = async (file: File) => {
-    if (!user) return
+    if (!user) return;
 
-    setIsUploadingPDF(true)
+    setIsUploadingPDF(true);
     try {
-      const response = await api.uploadPDF(file, user.user_id)
-      
+      const response = await api.uploadPDF(file, user.user_id);
+
       const newSession: ChatSession = {
         id: response.session_id,
         name: `Chat - ${response.pdf_filename}`,
         fileName: response.pdf_filename,
         createdAt: new Date(),
-      }
+      };
 
-      const updatedSessions = [newSession, ...sessions]
-      setSessions(updatedSessions)
-      setActiveSessionId(response.session_id)
-      setMessages({ ...messages, [response.session_id]: [] })
+      const updatedSessions = [newSession, ...sessions];
+      setSessions(updatedSessions);
+      setActiveSessionId(response.session_id);
+      setMessages({ ...messages, [response.session_id]: [] });
     } catch (error) {
-      console.error('Upload failed:', error)
-      alert('Failed to upload PDF. Please try again.')
+      console.error("Upload failed:", error);
+      alert("Failed to upload PDF. Please try again.");
     } finally {
-      setIsUploadingPDF(false)
+      setIsUploadingPDF(false);
     }
-  }
+  };
 
   const handleNewSession = () => {
-    setActiveSessionId(null)
-  }
+    setActiveSessionId(null);
+  };
 
   const handleSessionSelect = (sessionId: string) => {
-    setActiveSessionId(sessionId)
-  }
+    setActiveSessionId(sessionId);
+  };
 
   const handleDeleteSession = async (sessionId: string) => {
     try {
-      await api.deleteSession(sessionId)
-      
-      const updatedSessions = sessions.filter((s) => s.id !== sessionId)
-      setSessions(updatedSessions)
-      
-      const newMessages = { ...messages }
-      delete newMessages[sessionId]
-      setMessages(newMessages)
-      
+      await api.deleteSession(sessionId);
+
+      const updatedSessions = sessions.filter((s) => s.id !== sessionId);
+      setSessions(updatedSessions);
+
+      const newMessages = { ...messages };
+      delete newMessages[sessionId];
+      setMessages(newMessages);
+
       if (activeSessionId === sessionId) {
-        setActiveSessionId(null)
+        setActiveSessionId(null);
       }
     } catch (error) {
-      console.error('Failed to delete session:', error)
-      alert('Failed to delete session. Please try again.')
+      console.error("Failed to delete session:", error);
+      alert("Failed to delete session. Please try again.");
     }
-  }
+  };
 
   const handleSendMessage = async (content: string) => {
-    if (!activeSessionId || !user || isSendingMessage) return
+    if (!activeSessionId || !user || isSendingMessage) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
-      role: 'user',
+      role: "user",
       content,
       timestamp: new Date(),
-    }
+    };
 
     setMessages({
       ...messages,
       [activeSessionId]: [...(messages[activeSessionId] || []), userMessage],
-    })
+    });
 
-    setIsSendingMessage(true)
+    setIsSendingMessage(true);
     try {
-      const response = await api.sendMessage(activeSessionId, user.user_id, content)
-      
+      const response = await api.sendMessage(
+        activeSessionId,
+        user.user_id,
+        content,
+      );
+
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
-        role: 'assistant',
+        role: "assistant",
         content: response.assistant_message,
         timestamp: new Date(response.timestamp),
-      }
+      };
 
       setMessages((prev) => ({
         ...prev,
         [activeSessionId]: [...(prev[activeSessionId] || []), assistantMessage],
-      }))
+      }));
     } catch (error) {
-      console.error('Failed to send message:', error)
-      
+      console.error("Failed to send message:", error);
+
       // Add error message
       const errorMessage: Message = {
         id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'Sorry, I encountered an error processing your message. Please try again.',
+        role: "assistant",
+        content:
+          "Sorry, I encountered an error processing your message. Please try again.",
         timestamp: new Date(),
-      }
+      };
 
       setMessages((prev) => ({
         ...prev,
         [activeSessionId]: [...(prev[activeSessionId] || []), errorMessage],
-      }))
+      }));
     } finally {
-      setIsSendingMessage(false)
+      setIsSendingMessage(false);
     }
-  }
+  };
 
   // Show loading state
   if (isLoading) {
@@ -192,16 +199,16 @@ export default function Home() {
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   // Show auth pages if not logged in
   if (!user) {
-    return authView === 'login' ? (
-      <LoginPage onSwitchToSignup={() => setAuthView('signup')} />
+    return authView === "login" ? (
+      <LoginPage onSwitchToSignup={() => setAuthView("signup")} />
     ) : (
-      <SignupPage onSwitchToLogin={() => setAuthView('login')} />
-    )
+      <SignupPage onSwitchToLogin={() => setAuthView("login")} />
+    );
   }
 
   return (
@@ -253,7 +260,7 @@ export default function Home() {
       <div className="flex-1 overflow-hidden">
         {activeSession ? (
           <ChatInterface
-            messages={messages[activeSessionId] || []}
+            messages={messages[activeSessionId!] || []}
             fileName={activeSession.fileName}
             onSendMessage={handleSendMessage}
             isLoading={isSendingMessage}
@@ -263,5 +270,5 @@ export default function Home() {
         )}
       </div>
     </div>
-  )
+  );
 }
