@@ -36,7 +36,10 @@ export default function Home() {
 
   // Save sidebar collapse state to localStorage
   useEffect(() => {
-    localStorage.setItem("sidebarCollapsed", JSON.stringify(isSidebarCollapsed));
+    localStorage.setItem(
+      "sidebarCollapsed",
+      JSON.stringify(isSidebarCollapsed),
+    );
   }, [isSidebarCollapsed]);
 
   // Restore messages from localStorage on mount (for local cache)
@@ -142,7 +145,7 @@ export default function Home() {
   const loadChatHistory = async (sessionId: string) => {
     try {
       const history = await api.getChatHistory(sessionId);
-      const formattedMessages: Message[] = history.map((msg) => ({
+      const formattedMessages: Message[] = history.messages.map((msg) => ({
         id: crypto.randomUUID(),
         role: msg.role as "user" | "assistant",
         content: msg.content,
@@ -297,7 +300,7 @@ export default function Home() {
       <div
         className={cn(
           "hidden lg:flex lg:flex-col lg:border-r lg:border-border transition-smooth bg-card",
-          isSidebarCollapsed ? "lg:w-20" : "lg:w-64"
+          isSidebarCollapsed ? "lg:w-20" : "lg:w-64",
         )}
       >
         <ChatSidebar
