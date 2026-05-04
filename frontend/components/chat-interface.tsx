@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
-import { FileText, Loader2, Send } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { FileText, Loader2, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
 }
 
 interface ChatInterfaceProps {
-  messages: Message[]
-  fileName: string
-  onSendMessage: (message: string) => Promise<void>
-  isLoading?: boolean
+  messages: Message[];
+  fileName: string;
+  onSendMessage: (message: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
 export function ChatInterface({
@@ -29,39 +29,41 @@ export function ChatInterface({
   onSendMessage,
   isLoading = false,
 }: ChatInterfaceProps) {
-  const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isSending) return
+    e.preventDefault();
+    if (!input.trim() || isSending) return;
 
-    const message = input.trim()
-    setInput('')
-    setIsSending(true)
+    const message = input.trim();
+    setInput("");
+    setIsSending(true);
 
     try {
-      await onSendMessage(message)
+      await onSendMessage(message);
     } catch (error) {
-      console.error('[v0] Error sending message:', error)
+      console.error("[v0] Error sending message:", error);
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit(e)
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
-  }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -72,12 +74,14 @@ export function ChatInterface({
         </div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">{fileName}</h2>
-          <p className="text-xs text-muted-foreground">Ask anything about this document</p>
+          <p className="text-xs text-muted-foreground">
+            Ask anything about this document
+          </p>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-6" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
             <div className="flex h-full items-center justify-center py-12">
@@ -85,9 +89,12 @@ export function ChatInterface({
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                   <FileText className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Ready to chat!</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Ready to chat!
+                </h3>
                 <p className="mt-2 text-sm text-muted-foreground text-pretty">
-                  Ask me anything about the document and I'll help you find answers.
+                  Ask me anything about the document and I'll help you find
+                  answers.
                 </p>
               </div>
             </div>
@@ -97,28 +104,32 @@ export function ChatInterface({
             <div
               key={message.id}
               className={cn(
-                'flex gap-3',
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+                "flex gap-3",
+                message.role === "user" ? "justify-end" : "justify-start",
               )}
             >
-              {message.role === 'assistant' && (
+              {message.role === "assistant" && (
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
               )}
               <div
                 className={cn(
-                  'max-w-[80%] rounded-lg px-4 py-3',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
+                  "max-w-[80%] rounded-lg px-4 py-3",
+                  message.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground",
                 )}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                  {message.content}
+                </p>
               </div>
-              {message.role === 'user' && (
+              {message.role === "user" && (
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted flex-shrink-0">
-                  <span className="text-xs font-semibold text-foreground">You</span>
+                  <span className="text-xs font-semibold text-foreground">
+                    You
+                  </span>
                 </div>
               )}
             </div>
@@ -134,8 +145,10 @@ export function ChatInterface({
               </div>
             </div>
           )}
+
+          <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input */}
       <div className="border-t border-border bg-card p-4">
@@ -165,5 +178,5 @@ export function ChatInterface({
         </form>
       </div>
     </div>
-  )
+  );
 }
