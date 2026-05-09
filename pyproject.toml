@@ -1,0 +1,28 @@
+[project]
+name = "mero-pdf"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-community>=0.4.1",
+    "langchain-unstructured>=1.0.1",
+    "onnxruntime<1.26.0",
+    "unstructured[pdf]>=0.22.27",
+    "unstructured-client>=0.44.0",
+    "python-magic>=0.4.27",
+    "langchain-groq>=1.1.2",
+    "langchain-huggingface>=1.2.2",
+    "sentence-transformers>=5.4.1",
+    "qdrant-client==1.7.3",
+    "fastapi>=0.136.1",
+    "uvicorn[standard]>=0.46.0",
+    "python-multipart>=0.0.27",
+    "python-jose[cryptography]>=3.5.0",
+    "passlib[bcrypt]>=1.7.4",
+    "email-validator>=2.3.0",
+    "aiofiles>=25.1.0",
+    "motor>=3.7.1",
+    "pymongo>=4.17.0",
+    "azure-storage-blob>=12.28.0",
+]
