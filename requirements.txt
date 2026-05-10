@@ -11,6 +11,7 @@ langchain-huggingface
 # tools
 sentence-transformers
 qdrant-client == 1.7.3
+langchain-qdrant
 ragas
 
 # llm api
