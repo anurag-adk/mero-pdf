@@ -11,6 +11,11 @@ langchain-huggingface
 # tools
 sentence-transformers
 qdrant-client == 1.7.3
+ragas
+
+# llm api
+google-generativeai 
+langchain-google-genai
 
 # FastAPI and web server
 fastapi
