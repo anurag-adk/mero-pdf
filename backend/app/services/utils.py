@@ -4,7 +4,10 @@ import pickle
 from langchain_unstructured import UnstructuredLoader
 from langchain_classic.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Qdrant
+# from langchain_community.vectorstores import Qdrant
+from qdrant_client import QdrantClient
+from langchain_qdrant import QdrantVectorStore
+
 
 from backend.app.core.config import (
     UNSTRUCTURED_API_KEY,
@@ -102,7 +105,7 @@ def get_embeddings():
         encode_kwargs={'normalize_embeddings': True}
     )
 
-def setup_vectorstore(chunked_docs, embeddings, collection_name=None, force_recreate=True):
+def setup_vectorstore(chunked_docs, embeddings, collection_name=None):
     """
     Setup Qdrant vector store.
     Args:
@@ -114,13 +117,12 @@ def setup_vectorstore(chunked_docs, embeddings, collection_name=None, force_recr
     if collection_name is None:
         collection_name = QDRANT_COLLECTION_NAME
     
-    vectorstore = Qdrant.from_documents(
+    vectorstore = QdrantVectorStore.from_documents(
         documents=chunked_docs,
         embedding=embeddings,
         url=QDRANT_URL,
         api_key=QDRANT_API_KEY,
         collection_name=collection_name,
-        force_recreate=force_recreate,
     )
     print(f"Added {len(chunked_docs)} documents to Qdrant collection '{collection_name}'")
     return vectorstore
@@ -134,12 +136,25 @@ def get_vectorstore(embeddings, collection_name=None):
     """
     if collection_name is None:
         collection_name = QDRANT_COLLECTION_NAME
-    
-    return Qdrant.from_existing_collection(
-        embedding=embeddings,
-        collection_name=collection_name,
+
+    client = QdrantClient(
         url=QDRANT_URL,
         api_key=QDRANT_API_KEY,
+        prefer_grpc=False,
+        check_compatibility=False,
+    )
+    
+    # return Qdrant.from_existing_collection(
+    #     embedding=embeddings,
+    #     collection_name=collection_name,
+    #     url=QDRANT_URL,
+    #     api_key=QDRANT_API_KEY,
+    # )
+
+    return QdrantVectorStore(
+        client=client,
+        embedding=embeddings,
+        collection_name=collection_name,
     )
 
 
