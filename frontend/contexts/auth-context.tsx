@@ -22,17 +22,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  
 
+// safe auth check and cleanup
   useEffect(() => {
-    // Check if user is logged in (from localStorage)
-    const storedUser = localStorage.getItem('user')
-    const accessToken = localStorage.getItem('access_token')
-    
-    if (storedUser && accessToken) {
-      setUser(JSON.parse(storedUser))
-    }
+  const storedUser = localStorage.getItem('user')
+  const accessToken = localStorage.getItem('access_token')
+
+  if (!storedUser || !accessToken) {
+    setUser(null)
     setIsLoading(false)
-  }, [])
+    return
+  }
+
+  try {
+    setUser(JSON.parse(storedUser))
+  } catch (err) {
+    localStorage.removeItem('user')
+    localStorage.removeItem('access_token')
+    setUser(null)
+  }
+
+  setIsLoading(false)
+}, [])
+
 
   const login = async (email: string, password: string) => {
     try {

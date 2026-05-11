@@ -54,6 +54,42 @@ class ApiService {
       : {};
   }
 
+  
+private async handleResponse(response: Response) {
+  if (response.status === 401) {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+
+    alert("Session expired. Please login again.");
+
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+
+    throw new Error("Unauthorized");
+  }
+
+    if (response.status === 204) {
+    return null;
+  }
+  
+  if (!response.ok) {
+    let errorMessage = "Request failed";
+
+    try {
+      const error = await response.json();
+      errorMessage = error.detail || error.message || errorMessage;
+    } catch {
+      errorMessage = await response.text();
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return await response.json();
+}
+
+
   async signup(email: string, password: string): Promise<UserResponse> {
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
@@ -63,13 +99,9 @@ class ApiService {
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Signup failed");
-    }
-
-    return response.json();
+  return await this.handleResponse(response)
   }
+
 
   async login(email: string, password: string): Promise<LoginResponse> {
     const formData = new URLSearchParams();
@@ -84,13 +116,9 @@ class ApiService {
       body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Login failed");
-    }
-
-    return response.json();
+  return await this.handleResponse(response)
   }
+
 
   async uploadPDF(file: File, userId: string): Promise<UploadResponse> {
     const formData = new FormData();
@@ -103,13 +131,9 @@ class ApiService {
       body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Upload failed");
-    }
-
-    return response.json();
+    return await this.handleResponse(response);
   }
+
 
   async sendMessage(
     sessionId: string,
@@ -129,25 +153,16 @@ class ApiService {
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Failed to send message");
-    }
-
-    return response.json();
+    return await this.handleResponse(response);
   }
+
 
   async getSessions(userId: string): Promise<SessionResponse[]> {
     const response = await fetch(`${API_URL}/sessions`, {
       headers: this.getAuthHeader(),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Failed to fetch sessions");
-    }
-
-    return response.json();
+    return await this.handleResponse(response);
   }
 
   async getChatHistory(sessionId: string): Promise<ChatHistoryResponse> {
@@ -155,12 +170,7 @@ class ApiService {
       headers: this.getAuthHeader(),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Failed to fetch chat history");
-    }
-
-    return response.json();
+    return await this.handleResponse(response)
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -168,11 +178,7 @@ class ApiService {
       method: "DELETE",
       headers: this.getAuthHeader(),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || "Failed to delete session");
-    }
+    return await this.handleResponse(response)
   }
 }
 
