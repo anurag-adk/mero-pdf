@@ -1,0 +1,29 @@
+#langchain modules
+langchain-classic
+langchain-unstructured
+unstructured-client
+unstructured
+python-magic
+langchain-groq
+langchain-huggingface
+
+# tools
+sentence-transformers
+qdrant-client>=1.15.1,<2.0.0
+langchain-qdrant>=1.1.0
+
+# FastAPI and web server
+fastapi
+uvicorn
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+aiofiles
+python-dotenv
+
+# MongoDB
+motor
+certifi
+
+# cloud
+azure-storage-blob
