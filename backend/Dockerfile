@@ -8,15 +8,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install sys dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade pip
 
 # Copy the requirements into the container
 COPY requirements.txt .
 
 # Install python dependencies
+# RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend into  container
