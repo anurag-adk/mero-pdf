@@ -1,0 +1,32 @@
+.venv
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# Env files (unless explicitly needed, typically passed via docker-compose)
+.env
+.env.local
+
+# Frontend / Node
+node_modules/
+.next/
+dist/
+
+# Jupyter notebooks and results
+notebooks/
+
+# Ide and editor
+.vscode/
+
+# Local data
+data/
