@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+
 # Load environment variables
-load_dotenv()
+load_dotenv(BASE_DIR / ".env")
 
 # API Keys
 UNSTRUCTURED_API_KEY = os.getenv('UNSTRUCTURED_API_KEY')
@@ -15,7 +17,6 @@ AZURE_STORAGE_CONNECTION_STRING = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 AZURE_CONTAINER_NAME = os.getenv('AZURE_CONTAINER_NAME')
 
 # Paths
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 DATA_DIR = BASE_DIR / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
