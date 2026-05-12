@@ -2,11 +2,11 @@
 
 import React from "react";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { FileText, Loader2, Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export interface Message {
@@ -86,9 +86,9 @@ export function ChatInterface({
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border bg-card px-6 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <FileText className="h-5 w-5 text-primary" />
+      <div className="flex items-center gap-3 border-b border-border bg-card px-4 py-4 sm:px-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background">
+          <BrandLogo variant="mark" className="h-7 w-7" />
         </div>
         <div>
           <h2 className="text-sm font-semibold text-foreground">{fileName}</h2>
@@ -130,8 +130,8 @@ export function ChatInterface({
               )}
             >
               {message.role === "assistant" && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                  <FileText className="h-4 w-4 text-primary" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background flex-shrink-0">
+                  <BrandLogo variant="mark" className="h-5 w-5" />
                 </div>
               )}
               <div className="flex flex-col gap-1">
@@ -155,7 +155,7 @@ export function ChatInterface({
                 </span>
               </div>
               {message.role === "user" && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background flex-shrink-0">
                   <span className="text-xs font-semibold text-foreground">
                     You
                   </span>
@@ -166,8 +166,8 @@ export function ChatInterface({
 
           {isLoading && (
             <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                <FileText className="h-4 w-4 text-primary" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background flex-shrink-0">
+                <BrandLogo variant="mark" className="h-5 w-5" />
               </div>
               <div className="rounded-lg bg-muted px-4 py-3">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

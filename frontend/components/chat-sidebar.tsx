@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   FileText,
   MessageSquare,
@@ -46,6 +47,9 @@ export function ChatSidebar({
     return (
       <div className="flex h-full w-20 flex-col border-r border-border bg-card">
         <div className="flex items-center justify-center border-b border-border p-3">
+          <BrandLogo variant="mark" className="h-8 w-8" />
+        </div>
+        <div className="flex items-center justify-center border-b border-border px-2 py-2">
           <Button
             size="icon"
             variant="ghost"
@@ -111,7 +115,12 @@ export function ChatSidebar({
   return (
     <div className="flex h-full w-80 flex-col border-r border-border bg-card">
       <div className="flex items-center justify-between border-b border-border p-4 gap-2">
-        <h2 className="text-lg font-semibold text-foreground">Sessions</h2>
+        <div className="flex flex-col gap-1">
+          <BrandLogo variant="horizontal" className="max-w-[170px]" />
+          <span className="brand-mono text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground">
+            Sessions
+          </span>
+        </div>
         <div className="flex gap-2">
           <Button
             size="sm"
