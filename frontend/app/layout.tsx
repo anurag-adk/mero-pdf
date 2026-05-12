@@ -7,7 +7,26 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
-// ... existing code ...
+
+export const metadata: Metadata = {
+  title: {
+    default: "MeroPDF",
+    template: "%s | MeroPDF",
+  },
+  description:
+    "MeroPDF is an intelligent document query system for natural language PDF search and chat.",
+  icons: {
+    icon: [
+      { url: "/Logo/Brandmark-Light.png", media: "(prefers-color-scheme: light)" },
+      { url: "/Logo/Brandmark-Dark.png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: [
+      { url: "/Logo/Brandmark-Light.png", media: "(prefers-color-scheme: light)" },
+      { url: "/Logo/Brandmark-Dark.png", media: "(prefers-color-scheme: dark)" },
+    ],
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -15,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+      <body className="min-h-screen bg-background text-foreground">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
