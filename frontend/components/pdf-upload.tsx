@@ -4,8 +4,9 @@ import React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
-import { FileText, Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, FileText } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface PdfUploadProps {
@@ -49,12 +50,12 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
   };
 
   return (
-    <div className="flex h-full items-center justify-center p-8">
-      <Card className="w-full max-w-2xl p-8">
+    <div className="flex h-full items-center justify-center p-5 sm:p-8">
+      <Card className="w-full max-w-2xl border-border/70 bg-card/90 p-6 shadow-sm surface-glow sm:p-8">
         <div className="space-y-6">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <FileText className="h-8 w-8 text-primary" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-border bg-background">
+              <BrandLogo variant="mark" className="h-10 w-10" />
             </div>
             <h1 className="text-3xl font-bold text-balance text-foreground">
               Chat with Your PDF
@@ -72,7 +73,7 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
             }}
             onDragLeave={() => setIsDragging(false)}
             className={cn(
-              "relative rounded-xl border-2 border-dashed p-12 text-center transition-smooth shadow-sm",
+              "relative rounded-2xl border-2 border-dashed p-10 text-center transition-smooth shadow-sm sm:p-12",
               isDragging
                 ? "border-primary bg-gradient-to-b from-primary/10 to-accent/5 shadow-md"
                 : "border-border hover:border-primary/30 hover:bg-gradient-to-b hover:from-primary/5 hover:to-accent/5 hover:shadow-sm",
@@ -105,7 +106,7 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
           </div>
 
           {selectedFile && (
-            <div className="flex items-center justify-between rounded-xl border border-border/50 bg-gradient-to-r from-card to-muted/30 p-4 shadow-sm transition-smooth animate-fade-in">
+            <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-gradient-to-r from-card to-muted/30 p-4 shadow-sm transition-smooth animate-fade-in sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shadow-sm">
                   <FileText className="h-5 w-5 text-primary" />
