@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Set environment variables
+# These env variables are declared to prevent .pyc files and output buffer
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
@@ -8,6 +8,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Install sys dependencies
+# libmagic1 is needed for python-magic and unstructured (our project relies on it heavily for file type detection and content extraction)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic1 \
@@ -15,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install --upgrade pip
 
-# Copy the requirements into the container
+# Copy the requirements into the container....assuming Docker build context is the root dir
 COPY requirements.txt .
 
 # Install python dependencies
