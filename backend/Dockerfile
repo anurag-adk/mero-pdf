@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim AS builder
 
 # These env variables are declared to prevent .pyc files and output buffer
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -14,16 +14,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade pip
 
-# Copy the requirements into the container....assuming Docker build context is the root dir
-COPY requirements.txt .
+# Copy the production requirements into the builder stage
+COPY requirements.prod.txt .
 
-# Install python dependencies
-# RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install python dependencies in an isolated environment
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.prod.txt
+
+FROM python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH=/opt/venv/bin:$PATH
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy backend into  container
+COPY --from=builder /opt/venv /opt/venv
 COPY ./backend /app/backend
 
 # Expose the port the FastAPI application runs on
