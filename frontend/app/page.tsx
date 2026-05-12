@@ -125,9 +125,8 @@ export default function LandingPage() {
             <ThemeToggle />
             <Button
               asChild
-              variant="ghost"
               size="sm"
-              className="hidden rounded-full text-sm sm:inline-flex"
+              className="rounded-full bg-foreground px-5 text-sm text-background hover:bg-foreground/85"
             >
               <Link href="/signin">Sign in</Link>
             </Button>
@@ -144,7 +143,7 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-        <section className="flex flex-col items-center gap-12 py-20 text-center sm:py-28 lg:py-36">
+        <section className="flex flex-col items-center gap-12 py-8 text-center sm:py-12 lg:py-16">
           {/* Badge */}
           <div className="hero-fade-1 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs text-muted-foreground">
             <Zap className="h-3 w-3" />
@@ -222,7 +221,7 @@ export default function LandingPage() {
             {features.map((item) => (
               <Card
                 key={item.title}
-                className="rounded-xl border-border bg-card p-6 transition-colors hover:bg-muted/50"
+                className="rounded-xl border-border bg-card p-6 transition-all duration-300 hover:bg-muted/50 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background">
                   <item.icon className="h-4 w-4 text-foreground" />
@@ -255,7 +254,7 @@ export default function LandingPage() {
             {steps.map((step) => (
               <div
                 key={step.num}
-                className="rounded-xl border border-border bg-card p-6"
+                className="rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:bg-muted/30 cursor-pointer"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-sm font-semibold text-foreground">
                   {step.num}
@@ -351,39 +350,153 @@ export default function LandingPage() {
       </div>
 
       {/* ── Footer ── */}
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-        <footer className="border-t border-border py-12 sm:py-16">
-          <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">
-            <BrandLogo variant="horizontal" className="max-w-27" />
-            <p className="text-sm text-muted-foreground">
-              Chat with your PDFs. Zero complexity.
-            </p>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link
-                href="/signin"
-                className="transition-colors hover:text-foreground"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                className="transition-colors hover:text-foreground"
-              >
-                Sign up
-              </Link>
-              <a
-                href="#features"
-                className="transition-colors hover:text-foreground"
-              >
-                Features
+      <footer className="mt-20 border-t border-border bg-secondary/30">
+        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8 py-12 sm:py-16">
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div>
+              <BrandLogo
+                variant="horizontal"
+                className="max-w-27 mb-4"
+                isLink={false}
+              />
+              <p className="text-sm text-muted-foreground">
+                Chat with your PDFs. Zero complexity.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                Product
+              </h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a
+                    href="/signin"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Sign in
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/signup"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Get Started
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#features"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Pricing
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                Resources
+              </h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    API Reference
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">
+                Company
+              </h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Terms
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between text-sm text-muted-foreground">
+            <p>&copy; 2024 MeroPDF. All rights reserved.</p>
+            <div className="flex items-center gap-6 mt-4 sm:mt-0">
+              <a href="#" className="hover:text-foreground transition-colors">
+                Twitter
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                LinkedIn
+              </a>
+              <a href="#" className="hover:text-foreground transition-colors">
+                GitHub
               </a>
             </div>
           </div>
-          <p className="mt-8 text-center text-xs text-muted-foreground/50">
-            © 2026 MeroPDF. All rights reserved.
-          </p>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </main>
   );
 }

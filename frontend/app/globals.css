@@ -32,32 +32,32 @@
 }
 
 .dark {
-  --background: #0a0a0a;
+  --background: #1a1a1a;
   --foreground: #f0f0f0;
-  --card: #111111;
+  --card: #252525;
   --card-foreground: #f0f0f0;
-  --popover: #111111;
+  --popover: #2a2a2a;
   --popover-foreground: #f0f0f0;
   --primary: #f0f0f0;
-  --primary-foreground: #0a0a0a;
-  --secondary: #1a1a1a;
+  --primary-foreground: #1a1a1a;
+  --secondary: #313131;
   --secondary-foreground: #f0f0f0;
-  --muted: #1a1a1a;
-  --muted-foreground: #888888;
-  --accent: #222222;
+  --muted: #353535;
+  --muted-foreground: #a0a0a0;
+  --accent: #3a3a3a;
   --accent-foreground: #f0f0f0;
-  --destructive: #e05555;
-  --destructive-foreground: #0a0a0a;
-  --border: #222222;
-  --input: #1a1a1a;
+  --destructive: #f4bcbc;
+  --destructive-foreground: #8b2e2e;
+  --border: #353535;
+  --input: #2a2a2a;
   --ring: #f0f0f0;
-  --sidebar: #0e0e0e;
+  --sidebar: #1f1f1f;
   --sidebar-foreground: #f0f0f0;
   --sidebar-primary: #f0f0f0;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: #1a1a1a;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #313131;
   --sidebar-accent-foreground: #f0f0f0;
-  --sidebar-border: #222222;
+  --sidebar-border: #353535;
   --sidebar-ring: #f0f0f0;
 }
 
@@ -229,5 +229,49 @@
   }
   .dot-3 {
     animation: dotBounce 1.2s infinite 0.4s;
+  }
+
+  /* Auth page wipe reveal animation */
+  @keyframes wipeReveal {
+    from {
+      clip-path: inset(0 100% 0 0);
+      opacity: 0;
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      opacity: 1;
+    }
+  }
+  .auth-wipe-reveal {
+    animation: wipeReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* Auth page fade in animation */
+  @keyframes authFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .auth-fade-in {
+    animation: authFadeIn 0.6s ease-out both;
+  }
+
+  /* Animation delay utilities */
+  .animation-delay-100 {
+    animation-delay: 0.1s;
+  }
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+  .animation-delay-300 {
+    animation-delay: 0.3s;
+  }
+  .animation-delay-500 {
+    animation-delay: 0.5s;
   }
 }

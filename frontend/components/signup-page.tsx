@@ -36,10 +36,40 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      {/* ── Left: form ── */}
-      <div className="flex flex-col justify-between px-6 py-10 sm:px-10 lg:px-16">
-        <BrandLogo variant="horizontal" priority className="max-w-30" />
+    <div className="grid min-h-screen lg:grid-cols-[55%_45%]">
+      {/* ── Left: Logo & Brand ── */}
+      <div className="hidden lg:flex flex-col items-center justify-center px-16 py-16 bg-linear-to-br from-secondary/40 to-secondary/10 border-r border-border">
+        {/* Logo with wipe animation */}
+        <div className="auth-wipe-reveal mb-16">
+          <BrandLogo
+            variant="vertical"
+            priority
+            className="max-w-60"
+            isLink={true}
+          />
+        </div>
+
+        {/* Tagline with fade-in */}
+        <div className="text-center space-y-3 auth-fade-in animation-delay-300">
+          <h2 className="text-2xl font-semibold text-foreground">
+            Chat with your PDFs
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Upload documents and get instant answers powered by AI
+          </p>
+        </div>
+      </div>
+
+      {/* ── Right: Form ── */}
+      <div className="flex flex-col justify-between px-6 py-10 sm:px-10 lg:px-12">
+        <div className="lg:hidden mb-6">
+          <BrandLogo
+            variant="horizontal"
+            priority
+            className="max-w-30"
+            isLink={true}
+          />
+        </div>
 
         <div className="mx-auto w-full max-w-sm space-y-8 py-10">
           <div className="space-y-1.5">
@@ -108,7 +138,8 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
             </div>
 
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/8 px-3.5 py-2.5 text-xs text-destructive">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive font-medium flex items-center gap-2">
+                <span>⚠</span>
                 {error}
               </div>
             )}
@@ -162,39 +193,6 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
         <p className="text-xs text-muted-foreground/50 text-center">
           © 2026 MeroPDF
         </p>
-      </div>
-
-      {/* ── Right: brand panel ── */}
-      <div className="hidden flex-col justify-between border-l border-border bg-muted/30 px-16 py-16 lg:flex">
-        <div />
-        <div className="space-y-6">
-          <h2 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
-            Get started
-            <br />
-            <span className="font-light italic text-muted-foreground">
-              for free.
-            </span>
-          </h2>
-          <p className="max-w-sm text-sm leading-7 text-muted-foreground">
-            No credit card required. Join thousands of users who have
-            transformed how they work with documents.
-          </p>
-        </div>
-        <div className="space-y-3">
-          {[
-            "No credit card required",
-            "Instant document processing",
-            "Unlimited questions per session",
-          ].map((feat) => (
-            <div
-              key={feat}
-              className="flex items-center gap-2.5 text-sm text-muted-foreground"
-            >
-              <div className="h-1.5 w-1.5 rounded-full bg-foreground/40 shrink-0" />
-              {feat}
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

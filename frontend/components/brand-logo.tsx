@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
@@ -8,31 +9,34 @@ import { cn } from "@/lib/utils";
 interface BrandLogoProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "horizontal" | "vertical" | "icon" | "mark";
   priority?: boolean;
+  isLink?: boolean;
 }
 
 export function BrandLogo({
   variant = "horizontal",
   priority = false,
+  isLink = true,
   className,
   ...props
 }: BrandLogoProps) {
   const { theme } = useTheme();
 
   const getLogoPath = () => {
+    // Light logo for dark background, dark logo for light background
     const isDark = theme === "dark";
     switch (variant) {
       case "vertical":
-        return isDark ? "/Logo/Vertical-Dark.png" : "/Logo/Vertical-Light.png";
+        return isDark ? "/Logo/Vertical-Light.png" : "/Logo/Vertical-Dark.png";
       case "icon":
       case "mark":
         return isDark
-          ? "/Logo/Brandmark-Dark.png"
-          : "/Logo/Brandmark-Light.png";
+          ? "/Logo/Brandmark-Light.png"
+          : "/Logo/Brandmark-Dark.png";
       case "horizontal":
       default:
         return isDark
-          ? "/Logo/Horizontal-Dark.png"
-          : "/Logo/Horizontal-Light.png";
+          ? "/Logo/Horizontal-Light.png"
+          : "/Logo/Horizontal-Dark.png";
     }
   };
 
@@ -51,7 +55,7 @@ export function BrandLogo({
 
   const { width, height } = getLogoSize();
 
-  return (
+  const content = (
     <div className={cn("relative", className)} {...props}>
       <Image
         src={getLogoPath()}
@@ -63,4 +67,17 @@ export function BrandLogo({
       />
     </div>
   );
+
+  if (isLink) {
+    return (
+      <Link
+        href="/"
+        className="inline-block cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
