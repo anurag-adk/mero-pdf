@@ -3,10 +3,9 @@
 import React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
-import { Upload, Loader2, FileText } from "lucide-react";
+import { Upload, Loader2, FileText, ArrowRight } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface PdfUploadProps {
@@ -50,94 +49,106 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
   };
 
   return (
-    <div className="flex h-full items-center justify-center p-5 sm:p-8">
-      <Card className="w-full max-w-2xl border-border/70 bg-card/90 p-6 shadow-sm surface-glow sm:p-8">
-        <div className="space-y-6">
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-border bg-background">
-              <BrandLogo variant="mark" className="h-10 w-10" />
-            </div>
-            <h1 className="text-3xl font-bold text-balance text-foreground">
-              Chat with Your PDF
+    <div className="flex h-full items-center justify-center bg-background p-6 sm:p-10">
+      <div className="w-full max-w-lg space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-muted">
+            <BrandLogo variant="mark" className="h-7 w-7" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">
+              Chat with your PDF
             </h1>
-            <p className="mt-2 text-muted-foreground text-pretty">
-              Upload a PDF document and ask questions powered by AI
+            <p className="mt-1 text-sm text-muted-foreground">
+              Upload a document and ask questions powered by AI
             </p>
           </div>
-
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            className={cn(
-              "relative rounded-2xl border-2 border-dashed p-10 text-center transition-smooth shadow-sm sm:p-12",
-              isDragging
-                ? "border-primary bg-gradient-to-b from-primary/10 to-accent/5 shadow-md"
-                : "border-border hover:border-primary/30 hover:bg-gradient-to-b hover:from-primary/5 hover:to-accent/5 hover:shadow-sm",
-              isUploading && "pointer-events-none opacity-50",
-            )}
-          >
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleFileInput}
-              className="absolute inset-0 cursor-pointer opacity-0"
-              id="pdf-upload"
-              disabled={isUploading}
-            />
-            {isUploading ? (
-              <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
-            ) : (
-              <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
-            )}
-            <p className="mt-4 text-sm font-medium text-foreground">
-              {isUploading
-                ? "Uploading and processing your PDF..."
-                : "Drop your PDF here or click to browse"}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {isUploading
-                ? "This may take a few moments"
-                : "Supports PDF files up to 10MB"}
-            </p>
-          </div>
-
-          {selectedFile && (
-            <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-gradient-to-r from-card to-muted/30 p-4 shadow-sm transition-smooth animate-fade-in sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shadow-sm">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {selectedFile.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-              </div>
-              <Button
-                onClick={handleUpload}
-                disabled={isUploading}
-                className="transition-smooth"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  "Start Chat"
-                )}
-              </Button>
-            </div>
-          )}
         </div>
-      </Card>
+
+        {/* Drop Zone */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          className={cn(
+            "relative rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-150",
+            isDragging
+              ? "border-foreground/40 bg-muted/60"
+              : "border-border hover:border-foreground/20 hover:bg-muted/30",
+            isUploading && "pointer-events-none opacity-50",
+          )}
+        >
+          <input
+            type="file"
+            accept=".pdf"
+            onChange={handleFileInput}
+            className="absolute inset-0 cursor-pointer opacity-0"
+            id="pdf-upload"
+            disabled={isUploading}
+          />
+
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-background">
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {isUploading
+                  ? "Uploading and processing…"
+                  : "Drop your PDF here"}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {isUploading
+                  ? "This may take a few moments"
+                  : "or click to browse — PDF up to 10 MB"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Selected file */}
+        {selectedFile && (
+          <div className="flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 animate-fade-in">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">
+                {selectedFile.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+            <Button
+              onClick={handleUpload}
+              disabled={isUploading}
+              size="sm"
+              className="shrink-0 rounded-lg bg-foreground text-background hover:bg-foreground/85 text-xs px-4"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                  Uploading
+                </>
+              ) : (
+                <>
+                  Start Chat
+                  <ArrowRight className="ml-1.5 h-3 w-3" />
+                </>
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

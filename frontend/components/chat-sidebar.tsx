@@ -12,6 +12,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  PanelLeft,
 } from "lucide-react";
 
 export interface ChatSession {
@@ -43,123 +44,118 @@ export function ChatSidebar({
   onToggleCollapse,
 }: ChatSidebarProps) {
   if (isCollapsed) {
-    // Icon-only mode
     return (
-      <div className="flex h-full w-20 flex-col border-r border-border bg-card">
-        <div className="flex items-center justify-center border-b border-border p-3">
-          <BrandLogo variant="mark" className="h-8 w-8" />
+      <div className="flex h-full w-16 flex-col bg-sidebar">
+        {/* Logo mark */}
+        <div className="flex h-13 items-center justify-center border-b border-border">
+          <BrandLogo variant="mark" className="h-6 w-6" />
         </div>
-        <div className="flex items-center justify-center border-b border-border px-2 py-2">
+
+        {/* Expand toggle */}
+        <div className="flex items-center justify-center py-2 border-b border-border">
           <Button
             size="icon"
             variant="ghost"
             onClick={onToggleCollapse}
-            className="h-8 w-8 transition-smooth"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             title="Expand sidebar"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
+        {/* New session */}
+        <div className="flex items-center justify-center py-2.5 border-b border-border">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onNewSession}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title="New session"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+
         <ScrollArea className="flex-1">
-          <div className="space-y-2 p-2">
+          <div className="flex flex-col items-center gap-1 p-2">
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
+              <Loader2 className="mt-6 h-5 w-5 animate-spin text-muted-foreground" />
             ) : sessions.length === 0 ? (
-              <div className="flex justify-center py-8">
-                <FileText className="h-6 w-6 text-muted-foreground opacity-50" />
-              </div>
+              <FileText className="mt-6 h-5 w-5 text-muted-foreground/40" />
             ) : (
               sessions.map((session) => (
                 <button
                   key={session.id}
                   onClick={() => onSessionSelect(session.id)}
                   className={cn(
-                    "w-full rounded-lg p-2 transition-smooth flex items-center justify-center hover:bg-muted/50",
-                    activeSessionId === session.id &&
-                      "bg-primary/15 border border-primary/30",
+                    "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+                    activeSessionId === session.id
+                      ? "bg-foreground/10 text-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                   title={session.name}
                 >
-                  <MessageSquare
-                    className={cn(
-                      "h-5 w-5",
-                      activeSessionId === session.id
-                        ? "text-primary"
-                        : "text-muted-foreground",
-                    )}
-                  />
+                  <MessageSquare className="h-4 w-4" />
                 </button>
               ))
             )}
           </div>
         </ScrollArea>
-
-        <div className="border-t border-border p-2">
-          <Button
-            size="icon"
-            onClick={onNewSession}
-            className="h-8 w-8 transition-smooth mx-auto block"
-            title="New session"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     );
   }
 
-  // Full sidebar mode
+  // Full sidebar
   return (
-    <div className="flex h-full w-80 flex-col border-r border-border bg-card">
-      <div className="flex items-center justify-between border-b border-border p-4 gap-2">
-        <div className="flex flex-col gap-1">
-          <BrandLogo variant="horizontal" className="max-w-[170px]" />
-          <span className="brand-mono text-[0.65rem] uppercase tracking-[0.24em] text-muted-foreground">
-            Sessions
-          </span>
-        </div>
-        <div className="flex gap-2">
+    <div className="flex h-full w-65 flex-col bg-sidebar">
+      {/* Header */}
+      <div className="flex h-13 items-center justify-between border-b border-border px-4">
+        <BrandLogo variant="horizontal" className="max-w-30" />
+        <div className="flex items-center gap-0.5">
           <Button
-            size="sm"
+            size="icon"
+            variant="ghost"
             onClick={onNewSession}
-            className="h-8 w-8 p-0 transition-smooth hover:bg-primary/20"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
             title="New session"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
           </Button>
           {onToggleCollapse && (
             <Button
-              size="sm"
+              size="icon"
               variant="ghost"
               onClick={onToggleCollapse}
-              className="h-8 w-8 p-0 transition-smooth hover:bg-muted/50"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
               title="Collapse sidebar"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <PanelLeft className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
       </div>
 
+      {/* Label */}
+      <div className="px-4 py-3">
+        <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60">
+          All sessions
+        </p>
+      </div>
+
+      {/* Session list */}
       <ScrollArea className="flex-1">
-        <div className="space-y-2 p-3">
+        <div className="px-2 pb-3">
           {isLoading ? (
-            <div className="px-3 py-8 text-center">
-              <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                Loading sessions...
-              </p>
+            <div className="flex flex-col items-center gap-2 py-10">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">Loading...</p>
             </div>
           ) : sessions.length === 0 ? (
-            <div className="px-3 py-8 text-center">
-              <FileText className="mx-auto h-8 w-8 text-muted-foreground opacity-50" />
-              <p className="mt-2 text-sm text-muted-foreground">
-                No sessions yet
-              </p>
-              <p className="text-xs text-muted-foreground">
+            <div className="flex flex-col items-center gap-2 py-10 text-center">
+              <FileText className="h-8 w-8 text-muted-foreground/30" />
+              <p className="text-xs text-muted-foreground">No sessions yet</p>
+              <p className="text-xs text-muted-foreground/60">
                 Upload a PDF to start
               </p>
             </div>
@@ -168,49 +164,30 @@ export function ChatSidebar({
               <div
                 key={session.id}
                 className={cn(
-                  "group relative flex items-start gap-3 rounded-lg px-3 py-3 transition-smooth border border-transparent",
+                  "group relative flex items-center gap-2 rounded-lg px-3 py-2.5 transition-colors cursor-pointer",
                   activeSessionId === session.id
-                    ? "bg-gradient-to-r from-primary/20 to-accent/10 border-primary/40 shadow-sm"
-                    : "hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/5 hover:border-primary/20",
+                    ? "bg-foreground/8 text-foreground"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
                 )}
+                onClick={() => onSessionSelect(session.id)}
               >
-                <button
-                  onClick={() => onSessionSelect(session.id)}
-                  className="flex flex-1 items-start gap-3 text-left min-w-0"
-                  title={`${session.name} - ${session.fileName}`}
-                >
-                  <MessageSquare
-                    className={cn(
-                      "h-5 w-5 mt-0.5 flex-shrink-0 transition-colors",
-                      activeSessionId === session.id
-                        ? "text-primary"
-                        : "text-muted-foreground",
-                    )}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={cn(
-                        "text-sm font-medium text-foreground break-words leading-tight transition-colors",
-                        activeSessionId === session.id
-                          ? "text-primary font-semibold"
-                          : "text-foreground",
-                      )}
-                    >
-                      {session.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground break-words leading-tight mt-1">
-                      {session.fileName}
-                    </p>
-                  </div>
-                </button>
+                <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-xs font-medium leading-tight">
+                    {session.fileName}
+                  </p>
+                  <p className="truncate text-[10px] text-muted-foreground/60 mt-0.5">
+                    {session.createdAt.toLocaleDateString()}
+                  </p>
+                </div>
                 <Button
-                  size="sm"
+                  size="icon"
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteSession(session.id);
                   }}
-                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                  className="h-6 w-6 shrink-0 p-0 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
