@@ -1,383 +1,389 @@
 "use client";
 
-import { ChatInterface, type Message } from "@/components/chat-interface";
-import { ChatSidebar, type ChatSession } from "@/components/chat-sidebar";
-import { PdfUpload } from "@/components/pdf-upload";
-import { LoginPage } from "@/components/login-page";
-import { SignupPage } from "@/components/signup-page";
-import { UserProfile } from "@/components/user-profile";
+import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowRight,
+  Check,
+  FileText,
+  Layers3,
+  LockKeyhole,
+  Search,
+  Upload,
+  Zap,
+} from "lucide-react";
+
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
-import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import { Menu, X, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
 
-export default function Home() {
+const features = [
+  {
+    icon: Search,
+    title: "Smart search",
+    body: "RAG powered retrieval finds exact context in your PDFs.",
+  },
+  {
+    icon: Upload,
+    title: "Quick upload",
+    body: "Drop files and start chatting instantly.",
+  },
+  {
+    icon: LockKeyhole,
+    title: "Secure",
+    body: "Token auth and session-based privacy.",
+  },
+  {
+    icon: Layers3,
+    title: "Scalable stack",
+    body: "Qdrant, MongoDB, and Azure backend.",
+  },
+];
+
+const steps = [
+  { num: "1", title: "Upload PDF", body: "Bring your document in." },
+  { num: "2", title: "Ask", body: "Type your question naturally." },
+  { num: "3", title: "Get answer", body: "System retrieves context." },
+  { num: "4", title: "History saved", body: "All chats stay with session." },
+];
+
+const pricing = [
+  {
+    name: "Starter",
+    price: "Free",
+    points: ["1 user", "Basic uploads", "Chat history"],
+    featured: false,
+  },
+  {
+    name: "Pro",
+    price: "Soon",
+    points: ["More uploads", "Faster retrieval", "Better tools"],
+    featured: true,
+  },
+  {
+    name: "Team",
+    price: "Custom",
+    points: ["Multi-user", "Shared docs", "Priority support"],
+    featured: false,
+  },
+];
+
+const stats = [
+  { value: "RAG", label: "Fast search" },
+  { value: "Azure", label: "Storage" },
+  { value: "Qdrant", label: "Database" },
+  { value: "Auto-saved", label: "Sessions" },
+];
+
+export default function LandingPage() {
   const { user, isLoading } = useAuth();
-  const [authView, setAuthView] = useState<"login" | "signup">("login");
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Record<string, Message[]>>({});
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isLoadingSessions, setIsLoadingSessions] = useState(false);
-  const [isSendingMessage, setIsSendingMessage] = useState(false);
-  const [isUploadingPDF, setIsUploadingPDF] = useState(false);
+  const router = useRouter();
 
-  // Restore sidebar collapse state from localStorage
   useEffect(() => {
-    const savedCollapsedState = localStorage.getItem("sidebarCollapsed");
-    if (savedCollapsedState !== null) {
-      setIsSidebarCollapsed(JSON.parse(savedCollapsedState));
+    if (!isLoading && user) {
+      router.replace("/home");
     }
-  }, []);
+  }, [isLoading, router, user]);
 
-  // Save sidebar collapse state to localStorage
-  useEffect(() => {
-    localStorage.setItem(
-      "sidebarCollapsed",
-      JSON.stringify(isSidebarCollapsed),
-    );
-  }, [isSidebarCollapsed]);
-
-  // Restore messages from localStorage on mount (for local cache)
-  useEffect(() => {
-    const savedMessages = localStorage.getItem("messages");
-    if (savedMessages) {
-      try {
-        const parsed = JSON.parse(savedMessages);
-        setMessages(parsed);
-      } catch (e) {
-        console.error("Failed to parse saved messages:", e);
-      }
-    }
-  }, []);
-
-  // Restore active session from localStorage on mount
-  useEffect(() => {
-    const savedSessionId = localStorage.getItem("activeSessionId");
-    if (savedSessionId) {
-      setActiveSessionId(savedSessionId);
-    }
-  }, []);
-
-  // Save active session to localStorage
-  useEffect(() => {
-    if (activeSessionId && user?.user_id) {
-      localStorage.setItem("activeSessionId", activeSessionId);
-      localStorage.setItem("userId", user.user_id);
-    }
-  }, [activeSessionId, user?.user_id]);
-
-  // Save messages to localStorage
-  useEffect(() => {
-    localStorage.setItem("messages", JSON.stringify(messages));
-  }, [messages]);
-
-  // Load sessions from backend with fallback
-  useEffect(() => {
-    if (user) {
-      loadSessions();
-    } else {
-      // Clear data on logout
-      setSessions([]);
-      setActiveSessionId(null);
-      setMessages({});
-      localStorage.removeItem("activeSessionId");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("sessions_cache");
-    }
-  }, [user]);
-
-  // Load messages when active session changes
-  useEffect(() => {
-    if (activeSessionId && !messages[activeSessionId]) {
-      loadChatHistory(activeSessionId);
-    }
-  }, [activeSessionId]);
-
-  const loadSessions = async () => {
-    if (!user) return;
-
-    setIsLoadingSessions(true);
-    try {
-      const backendSessions = await api.getSessions(user.user_id);
-      const formattedSessions: ChatSession[] = backendSessions.map(
-        (session) => ({
-          id: session.session_id,
-          name: `Chat - ${session.pdf_filename}`,
-          fileName: session.pdf_filename,
-          createdAt: new Date(session.created_at),
-        }),
-      );
-      setSessions(formattedSessions);
-      // Cache sessions for offline/fallback use
-      localStorage.setItem("sessions_cache", JSON.stringify(backendSessions));
-    } catch (error) {
-      console.error("Failed to load sessions from backend:", error);
-
-      // Fallback: Try to restore from cached sessions
-      const cachedSessions = localStorage.getItem("sessions_cache");
-      if (cachedSessions) {
-        try {
-          const parsed = JSON.parse(cachedSessions);
-          const formattedSessions: ChatSession[] = parsed.map(
-            (session: any) => ({
-              id: session.session_id,
-              name: `Chat - ${session.pdf_filename}`,
-              fileName: session.pdf_filename,
-              createdAt: new Date(session.created_at),
-            }),
-          );
-          setSessions(formattedSessions);
-          console.warn("Restored sessions from cache due to API failure");
-        } catch (e) {
-          console.error("Failed to parse cached sessions:", e);
-        }
-      }
-    } finally {
-      setIsLoadingSessions(false);
-    }
-  };
-
-  const loadChatHistory = async (sessionId: string) => {
-    try {
-      const history = await api.getChatHistory(sessionId);
-      const formattedMessages: Message[] = history.messages.map((msg) => ({
-        id: crypto.randomUUID(),
-        role: msg.role as "user" | "assistant",
-        content: msg.content,
-        timestamp: new Date(msg.timestamp),
-      }));
-      setMessages((prev) => ({
-        ...prev,
-        [sessionId]: formattedMessages,
-      }));
-    } catch (error) {
-      console.error("Failed to load chat history:", error);
-      // Initialize empty messages array if history fails to load
-      setMessages((prev) => ({
-        ...prev,
-        [sessionId]: [],
-      }));
-    }
-  };
-
-  const activeSession = sessions.find((s) => s.id === activeSessionId);
-
-  const handleUpload = async (file: File) => {
-    if (!user) return;
-
-    setIsUploadingPDF(true);
-    try {
-      const response = await api.uploadPDF(file, user.user_id);
-
-      const newSession: ChatSession = {
-        id: response.session_id,
-        name: `Chat - ${response.pdf_filename}`,
-        fileName: response.pdf_filename,
-        createdAt: new Date(),
-      };
-
-      const updatedSessions = [newSession, ...sessions];
-      setSessions(updatedSessions);
-      setActiveSessionId(response.session_id);
-      setMessages({ ...messages, [response.session_id]: [] });
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Failed to upload PDF. Please try again.");
-    } finally {
-      setIsUploadingPDF(false);
-    }
-  };
-
-  const handleNewSession = () => {
-    setActiveSessionId(null);
-  };
-
-  const handleSessionSelect = (sessionId: string) => {
-    setActiveSessionId(sessionId);
-  };
-
-  const handleDeleteSession = async (sessionId: string) => {
-    try {
-      await api.deleteSession(sessionId);
-
-      const updatedSessions = sessions.filter((s) => s.id !== sessionId);
-      setSessions(updatedSessions);
-
-      const newMessages = { ...messages };
-      delete newMessages[sessionId];
-      setMessages(newMessages);
-
-      if (activeSessionId === sessionId) {
-        setActiveSessionId(null);
-      }
-    } catch (error) {
-      console.error("Failed to delete session:", error);
-      alert("Failed to delete session. Please try again.");
-    }
-  };
-
-  const handleSendMessage = async (content: string) => {
-    if (!activeSessionId || !user || isSendingMessage) return;
-
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
-      timestamp: new Date(),
-    };
-
-    setMessages({
-      ...messages,
-      [activeSessionId]: [...(messages[activeSessionId] || []), userMessage],
-    });
-
-    setIsSendingMessage(true);
-    try {
-      const response = await api.sendMessage(
-        activeSessionId,
-        user.user_id,
-        content,
-      );
-
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: response.assistant_message,
-        timestamp: new Date(response.timestamp),
-      };
-
-      setMessages((prev) => ({
-        ...prev,
-        [activeSessionId]: [...(prev[activeSessionId] || []), assistantMessage],
-      }));
-    } catch (error) {
-      console.error("Failed to send message:", error);
-
-      // Add error message
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content:
-          "Sorry, I encountered an error processing your message. Please try again.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => ({
-        ...prev,
-        [activeSessionId]: [...(prev[activeSessionId] || []), errorMessage],
-      }));
-    } finally {
-      setIsSendingMessage(false);
-    }
-  };
-
-  // Show loading state
-  if (isLoading) {
+  if (isLoading || user) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
       </div>
-    );
-  }
-
-  // Show auth pages if not logged in
-  if (!user) {
-    return authView === "login" ? (
-      <LoginPage onSwitchToSignup={() => setAuthView("signup")} />
-    ) : (
-      <SignupPage onSwitchToLogin={() => setAuthView("login")} />
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar Desktop */}
-      <div
-        className={cn(
-          "hidden lg:flex lg:flex-col lg:border-r lg:border-border transition-smooth bg-card",
-          isSidebarCollapsed ? "lg:w-20" : "lg:w-80",
-        )}
-      >
-        <ChatSidebar
-          sessions={sessions}
-          activeSessionId={activeSessionId}
-          onSessionSelect={handleSessionSelect}
-          onNewSession={handleNewSession}
-          onDeleteSession={handleDeleteSession}
-          isLoading={isLoadingSessions}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-      </div>
+    <main className="min-h-screen overflow-x-hidden bg-background">
+      {/* ── Nav ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <header className="flex items-center justify-between py-5">
+          <BrandLogo variant="horizontal" priority className="max-w-32" />
 
-      {/* Sidebar Mobile */}
-      {sidebarOpen && (
-        <>
-          <div className="fixed inset-y-0 left-0 z-40 w-80 lg:hidden overflow-hidden">
-            <ChatSidebar
-              sessions={sessions}
-              activeSessionId={activeSessionId}
-              onSessionSelect={handleSessionSelect}
-              onNewSession={handleNewSession}
-              onDeleteSession={handleDeleteSession}
-              isLoading={isLoadingSessions}
-              isCollapsed={false}
-            />
-          </div>
-          <div
-            className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        </>
-      )}
+          <nav className="hidden items-center gap-8 text-sm text-muted-foreground lg:flex">
+            <a
+              href="#features"
+              className="transition-colors hover:text-foreground"
+            >
+              Features
+            </a>
+            <a href="#how" className="transition-colors hover:text-foreground">
+              How It Works
+            </a>
+            <a
+              href="#pricing"
+              className="transition-colors hover:text-foreground"
+            >
+              Pricing
+            </a>
+          </nav>
 
-      {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Top bar with toggle and profile */}
-        <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="h-9 w-9"
-          >
-            {sidebarOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <UserProfile />
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden rounded-full text-sm sm:inline-flex"
+            >
+              <Link href="/signin">Sign in</Link>
+            </Button>
+            <Button
+              asChild
+              size="sm"
+              className="rounded-full bg-foreground px-5 text-sm text-background hover:bg-foreground/85"
+            >
+              <Link href="/signup">Get Started</Link>
+            </Button>
           </div>
-        </div>
-
-        {/* Desktop top bar just profile */}
-        <div className="hidden lg:flex lg:items-center lg:justify-end lg:gap-2 border-b border-border bg-card px-4 py-3">
-          <ThemeToggle />
-          <UserProfile />
-        </div>
-
-        {/* Content area */}
-        <div className="flex-1 overflow-hidden">
-          {activeSession ? (
-            <ChatInterface
-              messages={messages[activeSessionId!] || []}
-              fileName={activeSession.fileName}
-              onSendMessage={handleSendMessage}
-              isLoading={isSendingMessage}
-            />
-          ) : (
-            <PdfUpload onUpload={handleUpload} isUploading={isUploadingPDF} />
-          )}
-        </div>
+        </header>
       </div>
-    </div>
+
+      {/* ── Hero ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <section className="flex flex-col items-center gap-12 py-20 text-center sm:py-28 lg:py-36">
+          {/* Badge */}
+          <div className="hero-fade-1 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs text-muted-foreground">
+            <Zap className="h-3 w-3" />
+            AI-Powered PDF Intelligence
+          </div>
+
+          {/* Headline */}
+          <div className="hero-fade-2 space-y-4 max-w-3xl">
+            <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+              Chat with your
+              <span className="block font-light italic text-muted-foreground">
+                documents.
+              </span>
+            </h1>
+            <p className="mx-auto max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Upload your document, Ask questions, Get instant reliable answers.
+              No setup. No complexity. Pure simplicity.
+            </p>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="hero-fade-3 flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/85"
+            >
+              <Link href="/signup">
+                Get started free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="rounded-full px-8 border-border hover:bg-muted"
+            >
+              <a href="#how">Watch demo</a>
+            </Button>
+          </div>
+
+          {/* Stats row */}
+          <div className="hero-fade-4 grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
+            {stats.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-border bg-card px-4 py-5 text-center transition-colors hover:bg-muted/60"
+              >
+                <p className="text-base font-semibold text-foreground">
+                  {item.value}
+                </p>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {item.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ── Features ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <section id="features" className="space-y-12 py-20 sm:py-28">
+          <div className="space-y-2 text-center">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              Core Features
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Built for simplicity
+            </h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((item) => (
+              <Card
+                key={item.title}
+                className="rounded-xl border-border bg-card p-6 transition-colors hover:bg-muted/50"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background">
+                  <item.icon className="h-4 w-4 text-foreground" />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-foreground">
+                  {item.title}
+                </h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                  {item.body}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ── How It Works ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <section id="how" className="space-y-12 py-20 sm:py-28">
+          <div className="space-y-2 text-center">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              Process
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              How it works
+            </h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((step) => (
+              <div
+                key={step.num}
+                className="rounded-xl border border-border bg-card p-6"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-sm font-semibold text-foreground">
+                  {step.num}
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  {step.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ── Pricing ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <section id="pricing" className="space-y-12 py-20 sm:py-28">
+          <div className="space-y-2 text-center">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              Pricing
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Simple pricing
+            </h2>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            {pricing.map((tier) => (
+              <Card
+                key={tier.name}
+                className={`rounded-xl border p-6 transition-colors ${
+                  tier.featured
+                    ? "border-foreground/20 bg-foreground text-background"
+                    : "border-border bg-card hover:bg-muted/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <h3
+                    className={`text-sm font-semibold ${tier.featured ? "text-background" : "text-foreground"}`}
+                  >
+                    {tier.name}
+                  </h3>
+                  {tier.featured && (
+                    <span className="rounded-full border border-background/20 bg-background/10 px-3 py-1 text-xs text-background/80">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <p
+                  className={`mt-4 text-3xl font-semibold ${tier.featured ? "text-background" : "text-foreground"}`}
+                >
+                  {tier.price}
+                </p>
+                <div className="mt-6 space-y-3">
+                  {tier.points.map((point) => (
+                    <div
+                      key={point}
+                      className="flex items-center gap-3 text-sm"
+                    >
+                      <Check
+                        className={`h-4 w-4 shrink-0 ${tier.featured ? "text-background/70" : "text-foreground"}`}
+                      />
+                      <span
+                        className={
+                          tier.featured
+                            ? "text-background/80"
+                            : "text-muted-foreground"
+                        }
+                      >
+                        {point}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  asChild
+                  className={`mt-8 w-full rounded-lg text-sm ${
+                    tier.featured
+                      ? "bg-background text-foreground hover:bg-background/90"
+                      : "bg-foreground text-background hover:bg-foreground/85"
+                  }`}
+                >
+                  <Link href={tier.featured ? "/signup" : "#"}>
+                    {tier.featured ? "Get started" : "Learn more"}
+                  </Link>
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* ── Footer ── */}
+      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+        <footer className="border-t border-border py-12 sm:py-16">
+          <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">
+            <BrandLogo variant="horizontal" className="max-w-27" />
+            <p className="text-sm text-muted-foreground">
+              Chat with your PDFs. Zero complexity.
+            </p>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link
+                href="/signin"
+                className="transition-colors hover:text-foreground"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                className="transition-colors hover:text-foreground"
+              >
+                Sign up
+              </Link>
+              <a
+                href="#features"
+                className="transition-colors hover:text-foreground"
+              >
+                Features
+              </a>
+            </div>
+          </div>
+          <p className="mt-8 text-center text-xs text-muted-foreground/50">
+            © 2026 MeroPDF. All rights reserved.
+          </p>
+        </footer>
+      </div>
+    </main>
   );
 }
