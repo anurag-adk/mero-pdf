@@ -2,11 +2,11 @@
 
 import React from "react";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { FileText, Loader2, Send } from "lucide-react";
+import { ArrowUp, FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export interface Message {
@@ -34,6 +34,7 @@ export function ChatInterface({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,16 +43,14 @@ export function ChatInterface({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  // Handle scroll to show/hide button
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
       const { scrollHeight, scrollTop, clientHeight } = container;
-      // Show button if scrolled up more than 100px from bottom
       setShowScrollButton(scrollHeight - scrollTop - clientHeight > 100);
     };
 
@@ -84,40 +83,38 @@ export function ChatInterface({
   };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border bg-card px-6 py-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <FileText className="h-5 w-5 text-primary" />
+    <div className="flex h-full flex-col bg-background">
+      {/* ── Header ── */}
+      <div className="flex items-center gap-3 border-b border-border px-5 py-3.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted">
+          <FileText className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-sm font-semibold text-foreground">{fileName}</h2>
+          <p className="text-sm font-medium text-foreground leading-tight">
+            {fileName}
+          </p>
           <p className="text-xs text-muted-foreground">
             Ask anything about this document
           </p>
         </div>
       </div>
 
-      {/* Messages */}
-      <div
-        ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 sm:p-6 relative"
-      >
-        <div className="mx-auto max-w-3xl space-y-6">
+      {/* ── Messages ── */}
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-2xl px-5 py-6 space-y-5">
           {messages.length === 0 && (
-            <div className="flex h-full items-center justify-center py-12">
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <FileText className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  Ready to chat!
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground text-pretty">
-                  Ask me anything about the document and I'll help you find
-                  answers.
-                </p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
+                <BrandLogo variant="mark" className="h-8 w-8" />
               </div>
+              <h3 className="text-base font-semibold text-foreground">
+                Ready to help
+              </h3>
+              <p className="mt-1.5 max-w-xs text-sm text-muted-foreground">
+                Ask me anything about{" "}
+                <span className="font-medium text-foreground">{fileName}</span>{" "}
+                and I'll find the answer.
+              </p>
             </div>
           )}
 
@@ -130,33 +127,38 @@ export function ChatInterface({
               )}
             >
               {message.role === "assistant" && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                  <FileText className="h-4 w-4 text-primary" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted mt-0.5">
+                  <BrandLogo variant="mark" className="h-4 w-4" />
                 </div>
               )}
-              <div className="flex flex-col gap-1">
+
+              <div className="flex max-w-[80%] flex-col gap-1">
                 <div
                   className={cn(
-                    "max-w-[95%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-[80%] rounded-xl px-4 py-3 shadow-sm transition-smooth",
+                    "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                     message.role === "user"
-                      ? "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-none"
-                      : "bg-gradient-to-br from-card to-muted text-foreground rounded-bl-none border border-border/50 shadow-sm",
+                      ? "bg-foreground text-background rounded-br-sm"
+                      : "bg-muted text-foreground rounded-bl-sm border border-border/60",
                   )}
                 >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <p className="whitespace-pre-wrap">{message.content}</p>
                 </div>
-                <span className="text-xs text-muted-foreground px-2">
+                <span
+                  className={cn(
+                    "text-[10px] text-muted-foreground/60 px-1",
+                    message.role === "user" ? "text-right" : "text-left",
+                  )}
+                >
                   {message.timestamp.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </span>
               </div>
+
               {message.role === "user" && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                  <span className="text-xs font-semibold text-foreground">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-foreground mt-0.5">
+                  <span className="text-[10px] font-semibold text-background">
                     You
                   </span>
                 </div>
@@ -165,12 +167,34 @@ export function ChatInterface({
           ))}
 
           {isLoading && (
-            <div className="flex gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-                <FileText className="h-4 w-4 text-primary" />
+            <div className="flex gap-3 animate-fade-in">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted mt-0.5">
+                <BrandLogo variant="mark" className="h-4 w-4" />
               </div>
-              <div className="rounded-lg bg-muted px-4 py-3">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <div
+                className="relative ml-1 w-fit rounded-2xl rounded-bl-sm border border-border/70 bg-card px-4 py-3 shadow-sm"
+                role="status"
+                aria-live="polite"
+                aria-label="Assistant is typing"
+              >
+                <div
+                  className="absolute -left-1.5 bottom-2.5 h-3 w-3 rotate-45 rounded-bl-sm border-l border-b border-border/70 bg-card"
+                  aria-hidden="true"
+                />
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  <span
+                    className="dot-1 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
+                  <span
+                    className="dot-2 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
+                  <span
+                    className="dot-3 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -182,11 +206,11 @@ export function ChatInterface({
         {showScrollButton && (
           <button
             onClick={scrollToBottom}
-            className="fixed bottom-32 right-8 lg:right-10 z-10 rounded-full bg-primary text-primary-foreground p-3 shadow-lg transition-smooth hover:shadow-xl hover:scale-110 animate-fade-in"
+            className="fixed bottom-28 right-8 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background shadow-md transition-all hover:shadow-lg animate-fade-in"
             aria-label="Scroll to bottom"
           >
             <svg
-              className="h-5 w-5"
+              className="h-4 w-4 text-muted-foreground"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -202,31 +226,32 @@ export function ChatInterface({
         )}
       </div>
 
-      {/* Input */}
-      <div className="border-t border-border bg-card p-4">
-        <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
-          <div className="flex gap-2">
+      {/* ── Input ── */}
+      <div className="border-t border-border bg-background p-4">
+        <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
+          <div className="relative flex items-center gap-2 rounded-2xl border border-border bg-muted/40 px-4 py-3 focus-within:border-foreground/30 focus-within:bg-background transition-colors">
             <Textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about your document..."
-              className="min-h-[60px] resize-none"
+              className="min-h-10 max-h-32 flex-1 resize-none border-0 bg-transparent p-0 text-sm leading-6 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/60"
               disabled={isSending}
+              rows={1}
             />
             <Button
               type="submit"
               size="icon"
               disabled={!input.trim() || isSending}
-              className="h-[60px] w-[60px] flex-shrink-0"
+              className="h-8 w-8 shrink-0 rounded-xl bg-foreground text-background hover:bg-foreground/85 disabled:opacity-30"
             >
-              {isSending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
+              <ArrowUp className="h-4 w-4" />
             </Button>
           </div>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground/40">
+            Press Enter to send, Shift+Enter for new line
+          </p>
         </form>
       </div>
     </div>

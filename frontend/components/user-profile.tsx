@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useAuth } from '@/contexts/auth-context'
-import { Button } from '@/components/ui/button'
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,53 +9,58 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { LogOut, User } from 'lucide-react'
+} from "@/components/ui/dropdown-menu";
+import { LogOut, User } from "lucide-react";
 
 export function UserProfile() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
 
-  if (!user) return null
+  if (!user) return null;
 
-  // Get initials from email
   const getInitials = (email: string) => {
-    const name = email.split('@')[0]
-    return name.slice(0, 2).toUpperCase()
-  }
+    const name = email.split("@")[0];
+    return name.slice(0, 2).toUpperCase();
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+          className="relative h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:bg-accent text-xs font-semibold"
         >
-          <span className="text-sm font-medium">{getInitials(user.email)}</span>
+          {getInitials(user.email)}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium leading-none">{user.email.split('@')[0]}</p>
-            <p className="text-xs leading-none text-muted-foreground">
+      <DropdownMenuContent
+        className="w-56 rounded-xl border border-border bg-popover shadow-lg"
+        align="end"
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal px-3 py-2.5">
+          <div className="flex flex-col gap-0.5">
+            <p className="text-sm font-medium leading-none text-foreground">
+              {user.email.split("@")[0]}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground mt-1">
               {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
+        <DropdownMenuSeparator className="bg-border" />
+        <DropdownMenuItem className="cursor-pointer rounded-lg mx-1 text-sm">
+          <User className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
           <span>Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-border" />
         <DropdownMenuItem
-          className="cursor-pointer text-destructive focus:text-destructive"
+          className="cursor-pointer rounded-lg mx-1 mb-1 text-sm text-red-600 focus:text-red-600 focus:bg-red-50 dark:text-red-400 dark:focus:bg-red-950/20"
           onClick={logout}
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-3.5 w-3.5 text-inherit" />
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
