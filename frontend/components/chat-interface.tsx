@@ -43,7 +43,7 @@ export function ChatInterface({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -171,11 +171,29 @@ export function ChatInterface({
               <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted mt-0.5">
                 <BrandLogo variant="mark" className="h-4 w-4" />
               </div>
-              <div className="rounded-2xl rounded-bl-sm border border-border/60 bg-muted px-4 py-3">
-                <div className="flex items-end gap-1.5 h-4">
-                  <span className="dot-1 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
-                  <span className="dot-2 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
-                  <span className="dot-3 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
+              <div
+                className="relative ml-1 w-fit rounded-2xl rounded-bl-sm border border-border/70 bg-card px-4 py-3 shadow-sm"
+                role="status"
+                aria-live="polite"
+                aria-label="Assistant is typing"
+              >
+                <div
+                  className="absolute -left-1.5 bottom-2.5 h-3 w-3 rotate-45 rounded-bl-sm border-l border-b border-border/70 bg-card"
+                  aria-hidden="true"
+                />
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  <span
+                    className="dot-1 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
+                  <span
+                    className="dot-2 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
+                  <span
+                    className="dot-3 inline-block h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: "var(--muted-foreground)" }}
+                  />
                 </div>
               </div>
             </div>
