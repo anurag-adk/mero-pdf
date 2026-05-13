@@ -217,7 +217,7 @@
       opacity: 0.4;
     }
     40% {
-      transform: translateY(-4px);
+      transform: translateY(-8px);
       opacity: 1;
     }
   }

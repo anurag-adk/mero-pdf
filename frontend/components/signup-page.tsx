@@ -2,12 +2,13 @@
 
 import React from "react";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/components/brand-logo";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, FileText, Zap, Brain } from "lucide-react";
 
 interface SignupPageProps {
   onSwitchToLogin: () => void;
@@ -15,11 +16,16 @@ interface SignupPageProps {
 
 export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
   const { signup } = useAuth();
+  const { resolvedTheme } = useTheme();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const invertedButtonStyle =
+    resolvedTheme === "dark"
+      ? { backgroundColor: "#ffffff", color: "#000000" }
+      : { backgroundColor: "#000000", color: "#ffffff" };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,24 +45,63 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
     <div className="grid min-h-screen lg:grid-cols-[55%_45%]">
       {/* ── Left: Logo & Brand ── */}
       <div className="hidden lg:flex flex-col items-center justify-center px-16 py-16 bg-linear-to-br from-secondary/40 to-secondary/10 border-r border-border">
-        {/* Logo with wipe animation */}
-        <div className="auth-wipe-reveal mb-16">
+        {/* Logo with wipe animation - Bigger */}
+        <div className="auth-wipe-reveal mb-12">
           <BrandLogo
             variant="vertical"
             priority
-            className="max-w-60"
+            className="max-w-4xl 2xl:max-w-6xl"
             isLink={true}
           />
         </div>
 
         {/* Tagline with fade-in */}
-        <div className="text-center space-y-3 auth-fade-in animation-delay-300">
-          <h2 className="text-2xl font-semibold text-foreground">
-            Chat with your PDFs
-          </h2>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            Upload documents and get instant answers powered by AI
-          </p>
+        <div className="text-center space-y-6 auth-fade-in animation-delay-300 mt-2">
+          <div>
+            <h2 className="text-xl font-light text-foreground mb-1">
+              Unlock your documents
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Ask questions. Get answers. Instantly.
+            </p>
+          </div>
+
+          {/* Feature cards */}
+          <div className="space-y-3 pt-4">
+            <div className="flex items-start gap-3">
+              <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-xs font-medium text-foreground">
+                  Any Document
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDFs, reports, contracts
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Zap className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-xs font-medium text-foreground">
+                  Instant Answers
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  No waiting, no skimming
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Brain className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-xs font-medium text-foreground">
+                  AI Powered
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Smart understanding
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -138,15 +183,23 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
             </div>
 
             {error && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3.5 py-2.5 text-xs text-destructive font-medium flex items-center gap-2">
-                <span>⚠</span>
+              <div
+                className="rounded-lg border px-3.5 py-2.5 text-xs font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-1"
+                style={{
+                  backgroundColor: "#fff1f2",
+                  borderColor: "#fda4af",
+                  color: "#be123c",
+                }}
+              >
+                <span style={{ color: "#e11d48" }}>⚠</span>
                 {error}
               </div>
             )}
 
             <Button
               type="submit"
-              className="h-10 w-full rounded-lg bg-foreground text-sm font-medium text-background hover:bg-foreground/85"
+              style={invertedButtonStyle}
+              className="h-10 w-full rounded-lg text-sm font-semibold shadow-none hover:opacity-90 transition-colors"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -183,7 +236,7 @@ export function SignupPage({ onSwitchToLogin }: SignupPageProps) {
             <button
               type="button"
               onClick={onSwitchToLogin}
-              className="font-medium text-foreground hover:underline underline-offset-4"
+              className="font-medium text-foreground hover:underline underline-offset-4 cursor-pointer transition-colors hover:text-primary"
             >
               Sign in
             </button>

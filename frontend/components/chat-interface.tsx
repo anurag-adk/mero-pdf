@@ -104,7 +104,7 @@ export function ChatInterface({
         <div className="mx-auto max-w-2xl px-5 py-6 space-y-5">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-muted">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
                 <BrandLogo variant="mark" className="h-8 w-8" />
               </div>
               <h3 className="text-base font-semibold text-foreground">
@@ -127,7 +127,7 @@ export function ChatInterface({
               )}
             >
               {message.role === "assistant" && (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted mt-0.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted mt-0.5">
                   <BrandLogo variant="mark" className="h-4 w-4" />
                 </div>
               )}
@@ -168,14 +168,14 @@ export function ChatInterface({
 
           {isLoading && (
             <div className="flex gap-3 animate-fade-in">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-muted mt-0.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted mt-0.5">
                 <BrandLogo variant="mark" className="h-4 w-4" />
               </div>
               <div className="rounded-2xl rounded-bl-sm border border-border/60 bg-muted px-4 py-3">
-                <div className="flex items-center gap-1">
-                  <span className="dot-1 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 inline-block" />
-                  <span className="dot-2 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 inline-block" />
-                  <span className="dot-3 h-1.5 w-1.5 rounded-full bg-muted-foreground/50 inline-block" />
+                <div className="flex items-end gap-1.5 h-4">
+                  <span className="dot-1 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
+                  <span className="dot-2 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
+                  <span className="dot-3 inline-block h-2 w-2 rounded-full bg-muted-foreground/60" />
                 </div>
               </div>
             </div>
@@ -211,14 +211,14 @@ export function ChatInterface({
       {/* ── Input ── */}
       <div className="border-t border-border bg-background p-4">
         <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
-          <div className="relative flex items-end gap-2 rounded-2xl border border-border bg-muted/40 px-4 py-3 focus-within:border-foreground/30 focus-within:bg-background transition-colors">
+          <div className="relative flex items-center gap-2 rounded-2xl border border-border bg-muted/40 px-4 py-3 focus-within:border-foreground/30 focus-within:bg-background transition-colors">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a question about your document..."
-              className="min-h-6 max-h-32 flex-1 resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/60"
+              className="min-h-10 max-h-32 flex-1 resize-none border-0 bg-transparent p-0 text-sm leading-6 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/60"
               disabled={isSending}
               rows={1}
             />

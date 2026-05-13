@@ -14,7 +14,7 @@ langchain-qdrant>=1.1.0
 
 # FastAPI and web server
 fastapi
-uvicorn
+uvicorn[standard]
 python-multipart
 python-jose[cryptography]
 passlib[bcrypt]

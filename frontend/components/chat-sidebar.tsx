@@ -172,11 +172,14 @@ export function ChatSidebar({
                 onClick={() => onSessionSelect(session.id)}
               >
                 <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="truncate text-xs font-medium leading-tight">
+                <div className="flex-1 min-w-0 flex-col flex">
+                  <p
+                    className="text-xs font-medium leading-tight"
+                    style={{ overflowWrap: "anywhere" }}
+                  >
                     {session.fileName}
                   </p>
-                  <p className="truncate text-[10px] text-muted-foreground/60 mt-0.5">
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">
                     {session.createdAt.toLocaleDateString()}
                   </p>
                 </div>
@@ -187,9 +190,9 @@ export function ChatSidebar({
                     e.stopPropagation();
                     onDeleteSession(session.id);
                   }}
-                  className="h-6 w-6 shrink-0 p-0 opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10"
+                  className="group/delete h-6 w-6 shrink-0 p-0 text-foreground/80 transition-colors hover:!text-red-600 hover:!bg-red-50 dark:text-foreground/80 dark:hover:!text-red-400 dark:hover:!bg-red-950/20"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-3 w-3 transition-colors group-hover/delete:text-red-600 dark:group-hover/delete:text-red-400" />
                 </Button>
               </div>
             ))

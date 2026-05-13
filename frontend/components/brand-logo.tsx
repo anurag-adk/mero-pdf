@@ -43,7 +43,7 @@ export function BrandLogo({
   const getLogoSize = () => {
     switch (variant) {
       case "vertical":
-        return { width: 60, height: 80 };
+        return { width: 200, height: 280 };
       case "icon":
       case "mark":
         return { width: 40, height: 40 };
@@ -63,7 +63,7 @@ export function BrandLogo({
         width={width}
         height={height}
         priority={priority}
-        className="h-auto w-full"
+        className="block h-full w-full object-contain"
       />
     </div>
   );

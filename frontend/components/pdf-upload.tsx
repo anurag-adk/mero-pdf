@@ -53,7 +53,7 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
       <div className="w-full max-w-lg space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-muted">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
             <BrandLogo variant="mark" className="h-7 w-7" />
           </div>
           <div>
@@ -75,7 +75,7 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
           }}
           onDragLeave={() => setIsDragging(false)}
           className={cn(
-            "relative rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-150",
+            "relative rounded-2xl border-2 border-dashed p-8 sm:p-12 text-center transition-all duration-150 overflow-hidden",
             isDragging
               ? "border-foreground/40 bg-muted/60"
               : "border-border hover:border-foreground/20 hover:bg-muted/30",
@@ -92,14 +92,14 @@ export function PdfUpload({ onUpload, isUploading = false }: PdfUploadProps) {
           />
 
           <div className="flex flex-col items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-background">
+            <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-border bg-background">
               {isUploading ? (
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               ) : (
                 <Upload className="h-5 w-5 text-muted-foreground" />
               )}
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-foreground">
                 {isUploading
                   ? "Uploading and processing…"

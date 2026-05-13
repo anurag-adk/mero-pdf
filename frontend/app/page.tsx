@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   ArrowRight,
   Check,
+  Clock3,
   FileText,
   Layers3,
   LockKeyhole,
+  MessageSquare,
   Search,
   Upload,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -72,15 +76,37 @@ const pricing = [
 ];
 
 const stats = [
-  { value: "RAG", label: "Fast search" },
-  { value: "Azure", label: "Storage" },
-  { value: "Qdrant", label: "Database" },
-  { value: "Auto-saved", label: "Sessions" },
+  {
+    icon: Upload,
+    value: "PDF Uploads",
+    label: "Drop files and start chatting",
+  },
+  {
+    icon: MessageSquare,
+    value: "Ask Anything",
+    label: "Natural questions, grounded answers",
+  },
+  {
+    icon: Clock3,
+    value: "Session History",
+    label: "Conversations stay saved",
+  },
+  {
+    icon: ShieldCheck,
+    value: "Private Workspace",
+    label: "Your documents, isolated per session",
+  },
 ];
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  const invertedButtonStyle = isDark
+    ? { backgroundColor: "#ffffff", color: "#000000" }
+    : { backgroundColor: "#000000", color: "#ffffff" };
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -126,14 +152,15 @@ export default function LandingPage() {
             <Button
               asChild
               size="sm"
-              className="rounded-full bg-foreground px-5 text-sm text-background hover:bg-foreground/85"
+              className="rounded-full bg-foreground px-5 text-sm text-background hover:bg-foreground/85 font-medium shadow-none"
             >
               <Link href="/signin">Sign in</Link>
             </Button>
             <Button
               asChild
               size="sm"
-              className="rounded-full bg-foreground px-5 text-sm text-background hover:bg-foreground/85"
+              style={invertedButtonStyle}
+              className="rounded-full font-medium shadow-none"
             >
               <Link href="/signup">Get Started</Link>
             </Button>
@@ -169,7 +196,8 @@ export default function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="rounded-full bg-foreground px-8 text-background hover:bg-foreground/85"
+              style={invertedButtonStyle}
+              className="rounded-full font-semibold shadow-none"
             >
               <Link href="/signup">
                 Get started free
@@ -180,7 +208,7 @@ export default function LandingPage() {
               asChild
               size="lg"
               variant="outline"
-              className="rounded-full px-8 border-border hover:bg-muted"
+              className="rounded-full px-8 border-border hover:bg-muted cursor-pointer"
             >
               <a href="#how">Watch demo</a>
             </Button>
@@ -193,7 +221,8 @@ export default function LandingPage() {
                 key={item.label}
                 className="rounded-xl border border-border bg-card px-4 py-5 text-center transition-colors hover:bg-muted/60"
               >
-                <p className="text-base font-semibold text-foreground">
+                <item.icon className="mx-auto h-5 w-5 text-foreground" />
+                <p className="mt-3 text-base font-semibold text-foreground">
                   {item.value}
                 </p>
                 <p className="mt-1.5 text-xs text-muted-foreground">
